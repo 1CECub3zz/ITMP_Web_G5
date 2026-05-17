@@ -1,44 +1,61 @@
-// app.js (Frontend Controller for the Marketplace Feed)
-// 1. Import the encapsulated read function from the service layer
-import { getAllAvailableListings } from './db-services.js';
+// app.js
+// 1. Import both the "fetch all" and "fetch by category" APIs from the service layer
+import { getAllAvailableListings, getListingsByCategory } from './db-services.js';
+
+// The HTML container where cards will be drawn
+const feedContainer = document.getElementById('marketplace-feed');
 
 /**
- * Asynchronous function to fetch data and manipulate the DOM to display items.
+ * Reusable function to draw an array of listings into the DOM.
+ * @param {Array} listingsArray - The data to be rendered.
  */
-async function renderHomepageFeed() {
-    // Locate the container in the HTML where items will be displayed
-    const feedContainer = document.getElementById('marketplace-feed');
-
-    // Fetch the data array from the backend black box
-    const listings = await getAllAvailableListings();
-
-    // Handle the empty state (no items in the database)
-    if (listings.length === 0) {
-        feedContainer.innerHTML = "<p>There are no second-hand listings yet. Be the first to post!</p>";
+function renderCards(listingsArray) {
+    if (listingsArray.length === 0) {
+        feedContainer.innerHTML = "<p style='color: #888;'>No items found in this category.</p>";
         return;
     }
 
-    // Clear the "Loading cloud data..." text
-    feedContainer.innerHTML = "";
+    feedContainer.innerHTML = ""; // Clear existing content
 
-    // Iterate through the array and dynamically generate HTML for each item
-    listings.forEach(item => {
+    listingsArray.forEach(item => {
         // Construct a UI card using Template Literals
         const cardHTML = `
             <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; width: 200px; background: #f9f9f9; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">
                 <h3 style="margin-top: 0; color: #333; font-size: 1.1em;">${item.title}</h3>
                 <p style="color: #e44d26; font-weight: bold; font-size: 1.2em; margin: 10px 0;">RM ${item.price}</p>
-                <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Category: ${item.category}</p>
-                <button style="width: 100%; padding: 8px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px;">Contact Seller</button>
+                <span style="background-color: #e0e0e0; padding: 3px 8px; border-radius: 12px; font-size: 0.8em;">${item.category}</span>
+                <button style="width: 100%; margin-top: 15px; padding: 8px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">View Details</button>
             </div>
         `;
-
-        // Inject the generated card into the DOM container
         feedContainer.innerHTML += cardHTML;
     });
 }
 
-// Ensure the rendering function fires as soon as the HTML content is fully loaded
+/**
+ * Controller Function: Orchestrates the fetching and rendering based on category.
+ * @param {string} category - The category to filter by (default is "All").
+ */
+async function loadFeed(category = "All") {
+    feedContainer.innerHTML = "<p>Loading from cloud engine...</p>"; // Display loading state
+
+    let data = [];
+    if (category === "All") {
+        data = await getAllAvailableListings();
+    } else {
+        data = await getListingsByCategory(category);
+    }
+
+    renderCards(data);
+}
+
+// ==========================================
+// Event Listeners for UI Filter Buttons
+// ==========================================
+document.getElementById('filter-all').addEventListener('click', () => loadFeed("All"));
+document.getElementById('filter-books').addEventListener('click', () => loadFeed("Books"));
+document.getElementById('filter-electronics').addEventListener('click', () => loadFeed("Electronics"));
+
+// Initialize the feed when the DOM is fully loaded
 window.addEventListener('DOMContentLoaded', () => {
-    renderHomepageFeed();
+    loadFeed("All");
 });

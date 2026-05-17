@@ -1,76 +1,119 @@
 // db-services.js
-// 1. Import the configured database instance
-import { db } from './firebase-config.js';
-// 2. Import core Firestore functions for reading and writing data
-import { collection, addDoc, serverTimestamp, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+// 1. Import configured database and authentication objects
+import { db, auth } from './firebase-config.js';
+// 2. Import complete Firestore toolsets
+import { collection, addDoc, serverTimestamp, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 // ==========================================
-// Module 1: Write Function (POST - Create Listing)
+// Module 1: Write Function (POST - Create Listing with Auth)
 // ==========================================
 /**
- * Black-box function: Saves a new second-hand listing to the cloud database.
- * @param {Object} listingData - The data object passed from the frontend form.
- * @returns {Object} - Returns an object containing the success status and the document ID.
+ * Black-box function: Saves a new listing using the actively logged-in user's UID.
+ * @param {Object} listingData - The item data object from the frontend form.
+ * @returns {Object} - Result status and assigned document ID or error message.
  */
 export async function submitNewListing(listingData) {
     try {
-        console.log("🛠️ [Backend Service] Pushing data to Firestore...");
+        console.log("🛠️ [Backend Service] Verifying user session status...");
 
-        // Execute the write operation to the "listings" collection
+        // Fetch the currently authenticated user from the Firebase Auth instance
+        const currentUser = auth.currentUser;
+
+        // Security Gatekeeper: Block submission if no active session exists
+        if (!currentUser) {
+            console.warn("⚠️ [Backend Service] Write rejected: No active user session detected.");
+            return {
+                success: false,
+                errorMessage: "Authentication Required. You must be logged in to post an item."
+            };
+        }
+
+        console.log(`🔑 [Backend Service] Active session found (UID: ${currentUser.uid}). Pushing to Firestore...`);
+
+        // Execute write operation with true dynamic ownership metadata
         const docRef = await addDoc(collection(db, "listings"), {
             title: listingData.title,
-            price: Number(listingData.price), // Force conversion to Number to prevent string errors
-            category: listingData.category || "Uncategorized", // Provide a default if empty
+            price: Number(listingData.price),
+            category: listingData.category || "Uncategorized",
             description: listingData.description || "",
-            sellerUid: "test_user_001", // Hardcoded for testing; to be replaced by Auth UID later
+            sellerUid: currentUser.uid, // ERIADICATION OF HARDCODING: Dynamically bound authenticated UID
             status: "available",
-            createdAt: serverTimestamp() // Auto-generate an accurate server timestamp
+            createdAt: serverTimestamp()
         });
 
-        console.log("✅ [Backend Service] Data successfully written!");
-        // On success: Return a positive status and the unique document ID
+        console.log("✅ [Backend Service] Listing successfully created with owner UID binding.");
         return { success: true, id: docRef.id };
 
     } catch (error) {
         console.error("❌ [Backend Service] Write operation failed: ", error);
-        // On failure: Return a negative status and the error message
         return { success: false, errorMessage: error.message };
     }
 }
 
 // ==========================================
-// Module 2: Read Function (GET - Read Listings)
+// Module 2: Read All Function (GET - Fetch All Available)
 // ==========================================
-/**
- * Black-box function: Retrieves all available (unsold) second-hand listings.
- * @returns {Array} - Returns an array of objects, each containing listing data.
- */
 export async function getAllAvailableListings() {
     try {
-        console.log("📡 [Backend Service] Requesting listing data from the cloud...");
-
-        // 1. Build the query: Target the "listings" collection where status is "available"
+        console.log("📡 [Backend Service] Fetching all available listings...");
         const q = query(collection(db, "listings"), where("status", "==", "available"));
-
-        // 2. Send the request and await the snapshot
         const querySnapshot = await getDocs(q);
-
-        // 3. Initialize an empty array to store the fetched data
         const itemsArray = [];
 
-        // 4. Iterate through each document returned by the cloud
         querySnapshot.forEach((doc) => {
-            itemsArray.push({
-                id: doc.id, // The unique document ID
-                ...doc.data() // Spread operator: unpacks title, price, category, etc.
-            });
+            itemsArray.push({ id: doc.id, ...doc.data() });
         });
 
         console.log(`✅ [Backend Service] Successfully fetched ${itemsArray.length} items!`);
-        return itemsArray; // Return the populated array to the frontend
-
+        return itemsArray;
     } catch (error) {
         console.error("❌ [Backend Service] Data retrieval failed: ", error);
-        return []; // Return an empty array on failure to prevent frontend crashes
+        return [];
+    }
+}
+
+// ==========================================
+// Module 3: Filtered Read (GET - Query by Category)
+// ==========================================
+export async function getListingsByCategory(targetCategory) {
+    try {
+        console.log(`📡 [Backend Service] Fetching items for category: ${targetCategory}...`);
+        const q = query(
+            collection(db, "listings"),
+            where("status", "==", "available"),
+            where("category", "==", targetCategory)
+        );
+        const querySnapshot = await getDocs(q);
+        const filteredArray = [];
+
+        querySnapshot.forEach((doc) => {
+            filteredArray.push({ id: doc.id, ...doc.data() });
+        });
+
+        console.log(`✅ [Backend Service] Found ${filteredArray.length} items in ${targetCategory}.`);
+        return filteredArray;
+    } catch (error) {
+        console.error("❌ [Backend Service] Filter query failed: ", error);
+        return [];
+    }
+}
+
+// ==========================================
+// Module 4: Single Item Read (GET - Fetch by ID)
+// ==========================================
+export async function getListingById(documentId) {
+    try {
+        console.log(`📡 [Backend Service] Fetching exact item details for ID: ${documentId}...`);
+        const docRef = doc(db, "listings", documentId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("❌ [Backend Service] Single fetch failed: ", error);
+        return null;
     }
 }
