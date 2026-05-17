@@ -1,51 +1,82 @@
-// test.js (Frontend Controller for Form Submission)
-// 1. Import the encapsulated write function from the service layer
+// test.js (Form Submission & Authentication Simulator)
 import { submitNewListing } from './db-services.js';
+import { auth } from './firebase-config.js';
+import { signInAnonymously, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-// Listen for the button click event
+const statusText = document.getElementById('auth-status-text');
+
+// ==========================================
+// 1. Session Observer: Listen for user login/logout changes
+// ==========================================
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        statusText.innerHTML = `🟢 Session Status: <strong>Logged In</strong> (UID: <span style="color:#2e74b5">${user.uid}</span>)`;
+    } else {
+        statusText.innerHTML = `🔴 Session Status: <strong>Logged Out</strong> (Guest Mode - Write Operations Locked)`;
+    }
+});
+
+// ==========================================
+// 2. Simulated Auth Triggers
+// ==========================================
+document.getElementById('btn-mock-login').addEventListener('click', async () => {
+    try {
+        // Trigger a secure, real cloud authentication session anonymously for testing
+        await signInAnonymously(auth);
+        console.log("🔒 [Auth Simulator] Successfully authenticated token session with Cloud Authority.");
+    } catch (error) {
+        console.error("❌ [Auth Simulator] Authentication failed: ", error);
+    }
+});
+
+document.getElementById('btn-mock-logout').addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        console.log("🔒 [Auth Simulator] Destroyed current token session.");
+    } catch (error) {
+        console.error("❌ [Auth Simulator] Signout failed: ", error);
+    }
+});
+
+// ==========================================
+// 3. Core Form Handler
+// ==========================================
 document.getElementById('btn-submit-listing').addEventListener('click', async () => {
-
-    // Step A: Capture user input from the DOM elements
     const inputTitle = document.getElementById('listing-title').value;
     const inputPrice = document.getElementById('listing-price').value;
 
-    // Frontend Validation: Ensure fields are not empty before proceeding
     if (!inputTitle || !inputPrice) {
         alert("⚠️ Please fill in both the listing title and price!");
         return;
     }
 
-    // Step B: Package the captured data into a standard JSON payload
     const newListingData = {
         title: inputTitle,
         price: inputPrice,
-        category: "Books", // Simulating a dropdown selection
-        description: "This is a test textbook generated from the local environment."
+        category: "Electronics", // Simulating alternative category injection
+        description: "Secure, authenticated listing execution payload test."
     };
 
-    // UI Feedback: Update button state to prevent multiple submissions
     const btn = document.getElementById('btn-submit-listing');
     btn.innerText = "Uploading to Cloud...";
     btn.disabled = true;
 
-    // Step C: Trigger the Backend API and await the response
+    // Trigger Backend Black Box API
     const result = await submitNewListing(newListingData);
 
-    // Step D: Update the UI based on the backend response
     if (result.success === true) {
         alert("🎉 Listing published successfully! System ID: " + result.id);
-
-        // Clear the input fields after successful submission
         document.getElementById('listing-title').value = '';
         document.getElementById('listing-price').value = '';
 
-        // Optional: Reload the page to instantly show the new item in the feed
-        window.location.reload();
+        // Refresh the feed view safely
+        const filterAllBtn = document.getElementById('filter-all');
+        if(filterAllBtn) filterAllBtn.click();
     } else {
+        // This will trigger dynamically if the user is logged out!
         alert("❌ Failed to publish listing. Reason: " + result.errorMessage);
     }
 
-    // Restore the original button state
     btn.innerText = "Force Write to Cloud";
     btn.disabled = false;
 });
