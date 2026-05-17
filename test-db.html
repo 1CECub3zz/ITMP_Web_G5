@@ -2,17 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Firebase 连通性测试</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Integration Test - Echo Marketplace</title>
 </head>
-<body>
-<h2>Echo 后端引擎测试 - 发布二手商品</h2>
+<body style="font-family: Arial, sans-serif; padding: 20px;">
 
-<input type="text" id="listing-title" placeholder="输入商品名称 (如：二手高数课本)">
+<h2>Echo Backend Engine Test - Post a Listing</h2>
+
+<input type="text" id="listing-title" placeholder="Item Name (e.g., Used Calculus Book)" style="padding: 5px; width: 250px;">
 <br><br>
-<input type="number" id="listing-price" placeholder="输入价格 (如：50)">
+<input type="number" id="listing-price" placeholder="Price (e.g., 50)" style="padding: 5px; width: 250px;">
 <br><br>
-<button id="btn-submit-listing">强制写入云端</button>
+<button id="btn-submit-listing" style="padding: 8px 15px; cursor: pointer;">Force Write to Cloud</button>
+
+<hr style="margin: 30px 0;">
+
+<h2>Echo Marketplace - Latest Feed</h2>
+
+<div id="marketplace-feed" style="display: flex; gap: 20px; flex-wrap: wrap;">
+    <p>Loading cloud data...</p>
+</div>
 
 <script type="module" src="test.js"></script>
+<script type="module" src="app.js"></script>
+
 </body>
 </html>

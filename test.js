@@ -1,36 +1,51 @@
-// test.js
-// 1. 导入刚才配置好的 db
-import { db } from './firebase-config.js';
-// 2. 导入 Firestore 的写入函数
-import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+// test.js (Frontend Controller for Form Submission)
+// 1. Import the encapsulated write function from the service layer
+import { submitNewListing } from './db-services.js';
 
-// 3. 监听按钮点击事件
+// Listen for the button click event
 document.getElementById('btn-submit-listing').addEventListener('click', async () => {
-    // 获取前端输入框的值
-    const titleValue = document.getElementById('listing-title').value;
-    const priceValue = document.getElementById('listing-price').value;
 
-    if (!titleValue || !priceValue) {
-        alert("请输入商品名称和价格！");
+    // Step A: Capture user input from the DOM elements
+    const inputTitle = document.getElementById('listing-title').value;
+    const inputPrice = document.getElementById('listing-price').value;
+
+    // Frontend Validation: Ensure fields are not empty before proceeding
+    if (!inputTitle || !inputPrice) {
+        alert("⚠️ Please fill in both the listing title and price!");
         return;
     }
 
-    try {
-        console.log("准备连接 Firebase 云端...");
+    // Step B: Package the captured data into a standard JSON payload
+    const newListingData = {
+        title: inputTitle,
+        price: inputPrice,
+        category: "Books", // Simulating a dropdown selection
+        description: "This is a test textbook generated from the local environment."
+    };
 
-        // 核心代码：将数据写入 'listings' 集合
-        const docRef = await addDoc(collection(db, "listings"), {
-            title: titleValue,
-            price: Number(priceValue), // 确保存入的是数字格式
-            status: "available",
-            createdAt: serverTimestamp() // 使用 Firebase 的时间戳
-        });
+    // UI Feedback: Update button state to prevent multiple submissions
+    const btn = document.getElementById('btn-submit-listing');
+    btn.innerText = "Uploading to Cloud...";
+    btn.disabled = true;
 
-        console.log("🎉 写入成功！这件商品的云端身份证 (ID) 是: ", docRef.id);
-        alert("数据已成功发送！现在请去 Firebase 控制台查看。");
+    // Step C: Trigger the Backend API and await the response
+    const result = await submitNewListing(newListingData);
 
-    } catch (error) {
-        console.error("❌ 写入失败，请检查网络或配置: ", error);
-        alert("写入失败，请按 F12 查看 Console 报错。");
+    // Step D: Update the UI based on the backend response
+    if (result.success === true) {
+        alert("🎉 Listing published successfully! System ID: " + result.id);
+
+        // Clear the input fields after successful submission
+        document.getElementById('listing-title').value = '';
+        document.getElementById('listing-price').value = '';
+
+        // Optional: Reload the page to instantly show the new item in the feed
+        window.location.reload();
+    } else {
+        alert("❌ Failed to publish listing. Reason: " + result.errorMessage);
     }
+
+    // Restore the original button state
+    btn.innerText = "Force Write to Cloud";
+    btn.disabled = false;
 });
