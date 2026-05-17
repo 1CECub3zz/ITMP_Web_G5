@@ -5,12 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0bb3512c-cc95-4c41-8c71-69669806520e" name="更改" comment="Update 17 May">
-      <change afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db-services.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/firebase-config.js" beforeDir="false" afterPath="$PROJECT_DIR$/firebase-config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test-db.html" beforeDir="false" afterPath="$PROJECT_DIR$/test-db.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,7 +78,7 @@
       <updated>1779022089248</updated>
       <workItem from="1779022090271" duration="1971000" />
       <workItem from="1779024503723" duration="68000" />
-      <workItem from="1779024592907" duration="1417000" />
+      <workItem from="1779024592907" duration="1717000" />
     </task>
     <task id="LOCAL-00001" summary="Update 17 May">
       <option name="closed" value="true" />
@@ -93,7 +88,23 @@
       <option name="project" value="LOCAL" />
       <updated>1779023147663</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Update 17 May">
+      <option name="closed" value="true" />
+      <created>1779026074593</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1779026074593</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Update 17 May">
+      <option name="closed" value="true" />
+      <created>1779026100663</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1779026100663</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

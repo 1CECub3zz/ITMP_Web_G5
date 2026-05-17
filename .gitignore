@@ -67,3 +67,10 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# WebStorm 配置文件
+.idea/
+
+# Firebase 本地缓存与日志
+.firebase/
+firebase-debug.log
