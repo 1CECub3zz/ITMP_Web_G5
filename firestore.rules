@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      // 允许所有读写操作，直到 2026 年 6 月底
+      allow read, write: if request.time < timestamp.date(2026, 6, 30);
+    }
+  }
+}
