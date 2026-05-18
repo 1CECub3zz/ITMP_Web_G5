@@ -1,61 +1,83 @@
 // app.js
-// 1. Import both the "fetch all" and "fetch by category" APIs from the service layer
-import { getAllAvailableListings, getListingsByCategory } from './db-services.js';
+import { auth } from './firebase-config.js';
+import { signInAnonymously, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { submitBrewLog, getTopRatedBrews } from './db-services.js';
 
-// The HTML container where cards will be drawn
-const feedContainer = document.getElementById('marketplace-feed');
+// ==========================================
+// 1. Auth Management
+// ==========================================
+onAuthStateChanged(auth, (user) => {
+    const statusEl = document.getElementById('auth-status');
+    if (user) {
+        statusEl.innerHTML = `🟢 Logged In (Barista UID: ${user.uid})`;
+    } else {
+        statusEl.innerHTML = `🔴 Guest Mode (Cannot save logs)`;
+    }
+});
 
-/**
- * Reusable function to draw an array of listings into the DOM.
- * @param {Array} listingsArray - The data to be rendered.
- */
-function renderCards(listingsArray) {
-    if (listingsArray.length === 0) {
-        feedContainer.innerHTML = "<p style='color: #888;'>No items found in this category.</p>";
+document.getElementById('btn-login').addEventListener('click', () => signInAnonymously(auth));
+document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+// ==========================================
+// 2. Submit Brew Logic
+// ==========================================
+document.getElementById('btn-submit-brew').addEventListener('click', async () => {
+    const brewData = {
+        beanName: document.getElementById('input-bean').value,
+        roaster: document.getElementById('input-roaster').value,
+        method: document.getElementById('input-method').value,
+        dose: document.getElementById('input-dose').value,
+        rating: document.getElementById('input-rating').value,
+        comment: document.getElementById('input-comment').value
+    };
+
+    if (!brewData.beanName || !brewData.rating) {
+        alert("⚠️ Please at least provide the Bean Name and a Rating (1-5).");
         return;
     }
 
-    feedContainer.innerHTML = ""; // Clear existing content
+    const result = await submitBrewLog(brewData);
 
-    listingsArray.forEach(item => {
-        // Construct a UI card using Template Literals
-        const cardHTML = `
-            <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; width: 200px; background: #f9f9f9; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">
-                <h3 style="margin-top: 0; color: #333; font-size: 1.1em;">${item.title}</h3>
-                <p style="color: #e44d26; font-weight: bold; font-size: 1.2em; margin: 10px 0;">RM ${item.price}</p>
-                <span style="background-color: #e0e0e0; padding: 3px 8px; border-radius: 12px; font-size: 0.8em;">${item.category}</span>
-                <button style="width: 100%; margin-top: 15px; padding: 8px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">View Details</button>
+    if (result.success) {
+        alert("🎉 Brew Logged! ID: " + result.id);
+        loadLeaderboard(); // Auto-refresh the feed
+    } else {
+        alert("❌ Failed: " + result.errorMessage);
+    }
+});
+
+// ==========================================
+// 3. UI Rendering Logic (Dashboard/Records)
+// ==========================================
+async function loadLeaderboard() {
+    const feed = document.getElementById('brew-feed');
+    feed.innerHTML = "<p>Fetching database...</p>";
+
+    const brews = await getTopRatedBrews();
+
+    if (brews.length === 0) {
+        feed.innerHTML = "<p>No brews found. Start brewing!</p>";
+        return;
+    }
+
+    feed.innerHTML = "";
+    brews.forEach(item => {
+        const card = `
+            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; width: 220px; background: #fff;">
+                <h3 style="margin: 0; color: #4e342e;">${item.basics.beanName}</h3>
+                <p style="font-size: 0.8em; color: #888;">by ${item.basics.roaster}</p>
+                <hr>
+                <p><strong>Method:</strong> ${item.parameters.method}</p>
+                <p><strong>Dose:</strong> ${item.parameters.dose_grams}g</p>
+                <div style="background-color: #fff3e0; padding: 5px; text-align: center; font-size: 1.2em; font-weight: bold; color: #e65100; border-radius: 4px;">
+                    ⭐ ${item.review.rating} / 5
+                </div>
+                <p style="font-size: 0.9em; font-style: italic;">"${item.review.comment}"</p>
             </div>
         `;
-        feedContainer.innerHTML += cardHTML;
+        feed.innerHTML += card;
     });
 }
 
-/**
- * Controller Function: Orchestrates the fetching and rendering based on category.
- * @param {string} category - The category to filter by (default is "All").
- */
-async function loadFeed(category = "All") {
-    feedContainer.innerHTML = "<p>Loading from cloud engine...</p>"; // Display loading state
-
-    let data = [];
-    if (category === "All") {
-        data = await getAllAvailableListings();
-    } else {
-        data = await getListingsByCategory(category);
-    }
-
-    renderCards(data);
-}
-
-// ==========================================
-// Event Listeners for UI Filter Buttons
-// ==========================================
-document.getElementById('filter-all').addEventListener('click', () => loadFeed("All"));
-document.getElementById('filter-books').addEventListener('click', () => loadFeed("Books"));
-document.getElementById('filter-electronics').addEventListener('click', () => loadFeed("Electronics"));
-
-// Initialize the feed when the DOM is fully loaded
-window.addEventListener('DOMContentLoaded', () => {
-    loadFeed("All");
-});
+// Initial load
+window.addEventListener('DOMContentLoaded', () => loadLeaderboard());

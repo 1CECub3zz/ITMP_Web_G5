@@ -1,119 +1,76 @@
 // db-services.js
-// 1. Import configured database and authentication objects
 import { db, auth } from './firebase-config.js';
-// 2. Import complete Firestore toolsets
-import { collection, addDoc, serverTimestamp, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 // ==========================================
-// Module 1: Write Function (POST - Create Listing with Auth)
+// Module 1: Create a New Brew Log (POST)
 // ==========================================
-/**
- * Black-box function: Saves a new listing using the actively logged-in user's UID.
- * @param {Object} listingData - The item data object from the frontend form.
- * @returns {Object} - Result status and assigned document ID or error message.
- */
-export async function submitNewListing(listingData) {
+export async function submitBrewLog(brewData) {
     try {
-        console.log("🛠️ [Backend Service] Verifying user session status...");
-
-        // Fetch the currently authenticated user from the Firebase Auth instance
+        console.log("🛠️ [Backend] Validating session and preparing nested data...");
         const currentUser = auth.currentUser;
 
-        // Security Gatekeeper: Block submission if no active session exists
         if (!currentUser) {
-            console.warn("⚠️ [Backend Service] Write rejected: No active user session detected.");
-            return {
-                success: false,
-                errorMessage: "Authentication Required. You must be logged in to post an item."
-            };
+            return { success: false, errorMessage: "Authentication required to log a brew." };
         }
 
-        console.log(`🔑 [Backend Service] Active session found (UID: ${currentUser.uid}). Pushing to Firestore...`);
-
-        // Execute write operation with true dynamic ownership metadata
-        const docRef = await addDoc(collection(db, "listings"), {
-            title: listingData.title,
-            price: Number(listingData.price),
-            category: listingData.category || "Uncategorized",
-            description: listingData.description || "",
-            sellerUid: currentUser.uid, // ERIADICATION OF HARDCODING: Dynamically bound authenticated UID
-            status: "available",
+        // Structuring the data based on the new Beverage Brewing ERD
+        const docRef = await addDoc(collection(db, "brews"), {
+            authorUid: currentUser.uid,
+            isPublic: true,
+            basics: {
+                beanName: brewData.beanName || "Unknown Bean",
+                roaster: brewData.roaster || "Unknown Roaster"
+            },
+            parameters: {
+                method: brewData.method || "V60",
+                dose_grams: Number(brewData.dose) || 0
+            },
+            review: {
+                rating: Number(brewData.rating) || 0, // 1 to 5 scale
+                comment: brewData.comment || ""
+            },
+            metrics: {
+                commentCount: 0 // Default starting value
+            },
             createdAt: serverTimestamp()
         });
 
-        console.log("✅ [Backend Service] Listing successfully created with owner UID binding.");
+        console.log("✅ [Backend] Brew log successfully recorded!");
         return { success: true, id: docRef.id };
 
     } catch (error) {
-        console.error("❌ [Backend Service] Write operation failed: ", error);
+        console.error("❌ [Backend] Failed to save brew log: ", error);
         return { success: false, errorMessage: error.message };
     }
 }
 
 // ==========================================
-// Module 2: Read All Function (GET - Fetch All Available)
+// Module 2: Fetch Top Rated Brews (GET & SORT)
 // ==========================================
-export async function getAllAvailableListings() {
+export async function getTopRatedBrews() {
     try {
-        console.log("📡 [Backend Service] Fetching all available listings...");
-        const q = query(collection(db, "listings"), where("status", "==", "available"));
-        const querySnapshot = await getDocs(q);
-        const itemsArray = [];
+        console.log("📡 [Backend] Fetching top-rated brews from the community...");
 
-        querySnapshot.forEach((doc) => {
-            itemsArray.push({ id: doc.id, ...doc.data() });
-        });
-
-        console.log(`✅ [Backend Service] Successfully fetched ${itemsArray.length} items!`);
-        return itemsArray;
-    } catch (error) {
-        console.error("❌ [Backend Service] Data retrieval failed: ", error);
-        return [];
-    }
-}
-
-// ==========================================
-// Module 3: Filtered Read (GET - Query by Category)
-// ==========================================
-export async function getListingsByCategory(targetCategory) {
-    try {
-        console.log(`📡 [Backend Service] Fetching items for category: ${targetCategory}...`);
+        // Advanced Query: Sort by nested field 'review.rating' in descending order
         const q = query(
-            collection(db, "listings"),
-            where("status", "==", "available"),
-            where("category", "==", targetCategory)
+            collection(db, "brews"),
+            orderBy("review.rating", "desc"),
+            limit(10) // Only fetch the top 10
         );
+
         const querySnapshot = await getDocs(q);
-        const filteredArray = [];
+        const brewsArray = [];
 
         querySnapshot.forEach((doc) => {
-            filteredArray.push({ id: doc.id, ...doc.data() });
+            brewsArray.push({ id: doc.id, ...doc.data() });
         });
 
-        console.log(`✅ [Backend Service] Found ${filteredArray.length} items in ${targetCategory}.`);
-        return filteredArray;
+        console.log(`✅ [Backend] Fetched ${brewsArray.length} top-rated brews.`);
+        return brewsArray;
+
     } catch (error) {
-        console.error("❌ [Backend Service] Filter query failed: ", error);
+        console.error("❌ [Backend] Failed to fetch brews: ", error);
         return [];
-    }
-}
-
-// ==========================================
-// Module 4: Single Item Read (GET - Fetch by ID)
-// ==========================================
-export async function getListingById(documentId) {
-    try {
-        console.log(`📡 [Backend Service] Fetching exact item details for ID: ${documentId}...`);
-        const docRef = doc(db, "listings", documentId);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            return { id: docSnap.id, ...docSnap.data() };
-        } else {
-            return null;
-        }
-    } catch (error) {
-        console.error("❌ [Backend Service] Single fetch failed: ", error);
-        return null;
     }
 }
