@@ -1,0 +1,26 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "brew_id": {
+      "type": "string",
+      "description": "ID of the brew being commented on"
+    },
+    "content": {
+      "type": "string",
+      "description": "Comment text"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Author display name"
+    },
+    "author_email": {
+      "type": "string",
+      "description": "Author email"
+    }
+  },
+  "required": [
+    "brew_id",
+    "content"
+  ]
+}

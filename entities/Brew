@@ -1,0 +1,81 @@
+{
+  "name": "Brew",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Beverage name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Coffee",
+        "Tea",
+        "Matcha",
+        "Juice",
+        "Other"
+      ],
+      "description": "Beverage type"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "Pour Over",
+        "French Press",
+        "Cold Brew",
+        "Espresso",
+        "Whisk",
+        "Steep",
+        "Blend",
+        "Other"
+      ],
+      "description": "Brewing method"
+    },
+    "temperature": {
+      "type": "number",
+      "description": "Brewing temperature in Celsius"
+    },
+    "ingredients": {
+      "type": "string",
+      "description": "List of ingredients"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Personal notes"
+    },
+    "rating": {
+      "type": "number",
+      "description": "User rating 1-5"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Resolved photo URL for display"
+    },
+    "image_ref": {
+      "type": "string",
+      "description": "Stored photo reference"
+    },
+    "tutorial_video_url": {
+      "type": "string",
+      "description": "Resolved tutorial video URL for display"
+    },
+    "tutorial_video_ref": {
+      "type": "string",
+      "description": "Stored tutorial video reference"
+    },
+    "is_favourite": {
+      "type": "boolean",
+      "default": false,
+      "description": "Marked as favourite"
+    },
+    "brew_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of brew"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ]
+}
