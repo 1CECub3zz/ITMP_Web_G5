@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0bb3512c-cc95-4c41-8c71-69669806520e" name="更改" comment="feat(backend): integrate firebase auth with firestore and implement server-side category filtering&#10;&#10;- Eradicated hardcoded seller metadata by dynamically binding `sellerUid` to `auth.currentUser.uid`.&#10;- Implemented a global authentication session observer using `onAuthStateChanged` to secure database write operations.&#10;- Added developer authentication simulation tools (`signInAnonymously` and `signOut`) within the test environment.&#10;- Engineered server-side query filtration logic (`getListingsByCategory`) and single-document retrieval (`getListingById`).&#10;- Resolved index latency by provisioning cloud-side B-Tree Composite Indexes for compound state queries.&#10;- Updated all core scripts (`firebase-config.js`, `db-services.js`, `test.js`, `app.js`) to full-text English documentation standards.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-    </list>
+    <list default="true" id="0bb3512c-cc95-4c41-8c71-69669806520e" name="更改" comment="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -101,7 +98,7 @@
       <workItem from="1779022090271" duration="1971000" />
       <workItem from="1779024503723" duration="68000" />
       <workItem from="1779024592907" duration="4422000" />
-      <workItem from="1779076806241" duration="55000" />
+      <workItem from="1779076806241" duration="923000" />
     </task>
     <task id="LOCAL-00001" summary="Update 17 May">
       <option name="closed" value="true" />
@@ -151,7 +148,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779027935653</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture.">
+      <option name="closed" value="true" />
+      <created>1779077123226</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1779077123226</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -160,7 +165,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Update 17 May" />
     <MESSAGE value="feat(backend): integrate firebase auth with firestore and implement server-side category filtering&#10;&#10;- Eradicated hardcoded seller metadata by dynamically binding `sellerUid` to `auth.currentUser.uid`.&#10;- Implemented a global authentication session observer using `onAuthStateChanged` to secure database write operations.&#10;- Added developer authentication simulation tools (`signInAnonymously` and `signOut`) within the test environment.&#10;- Engineered server-side query filtration logic (`getListingsByCategory`) and single-document retrieval (`getListingById`).&#10;- Resolved index latency by provisioning cloud-side B-Tree Composite Indexes for compound state queries.&#10;- Updated all core scripts (`firebase-config.js`, `db-services.js`, `test.js`, `app.js`) to full-text English documentation standards." />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(backend): integrate firebase auth with firestore and implement server-side category filtering&#10;&#10;- Eradicated hardcoded seller metadata by dynamically binding `sellerUid` to `auth.currentUser.uid`.&#10;- Implemented a global authentication session observer using `onAuthStateChanged` to secure database write operations.&#10;- Added developer authentication simulation tools (`signInAnonymously` and `signOut`) within the test environment.&#10;- Engineered server-side query filtration logic (`getListingsByCategory`) and single-document retrieval (`getListingById`).&#10;- Resolved index latency by provisioning cloud-side B-Tree Composite Indexes for compound state queries.&#10;- Updated all core scripts (`firebase-config.js`, `db-services.js`, `test.js`, `app.js`) to full-text English documentation standards." />
+    <MESSAGE value="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture." />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture." />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
