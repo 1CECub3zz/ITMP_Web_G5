@@ -3,46 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Echo Brew Log - Backend Test</title>
+    <title>Welcome to Echo Brews</title>
 </head>
-<body style="font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
+<body style="font-family: Arial, sans-serif; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #f4f1ea; margin: 0;">
 
-<div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-    <strong>🔐 Brewer Session: </strong>
-    <button id="btn-login" style="cursor: pointer;">Simulate Login</button>
-    <button id="btn-logout" style="cursor: pointer;">Logout</button>
-    <p id="auth-status" style="margin: 5px 0 0 0; font-size: 0.9em;">Status: Checking...</p>
+<div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 400px;">
+    <h1 style="color: #3e2723; margin-top: 0;">☕ Echo Brews</h1>
+    <p style="color: #5d4037; margin-bottom: 30px;">Your professional digital brewing log and community platform.</p>
+
+    <button id="btn-login" style="background-color: #4e342e; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; width: 100%; transition: background 0.3s;">
+        Enter the Lab (Login)
+    </button>
+    <p id="login-status" style="margin-top: 15px; font-size: 0.9em; color: #d32f2f; display: none;">Authenticating to cloud...</p>
 </div>
 
-<h2>Log a New Brew</h2>
+<script type="module" src="controller-login.js"></script>
 
-<div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px;">
-    <h4>Step 1: Basics</h4>
-    <input type="text" id="input-bean" placeholder="Bean/Tea Name (e.g., Ethiopian Yirgacheffe)" style="width: 100%; margin-bottom: 10px;">
-    <input type="text" id="input-roaster" placeholder="Roaster (e.g., Onyx Coffee)" style="width: 100%; margin-bottom: 10px;">
-
-    <h4>Step 2: Parameters</h4>
-    <select id="input-method" style="margin-bottom: 10px;">
-        <option value="V60">Hario V60</option>
-        <option value="Aeropress">AeroPress</option>
-        <option value="Espresso">Espresso</option>
-    </select>
-    <input type="number" id="input-dose" placeholder="Dose in grams (e.g., 15)" style="width: 100%; margin-bottom: 10px;">
-
-    <h4>Step 3: Review</h4>
-    <input type="number" id="input-rating" placeholder="Rating (1-5)" min="1" max="5" style="width: 100%; margin-bottom: 10px;">
-    <textarea id="input-comment" placeholder="Tasting notes..." style="width: 100%; margin-bottom: 10px;"></textarea>
-
-    <button id="btn-submit-brew" style="padding: 10px 20px; background-color: #333; color: #fff; border: none; cursor: pointer; width: 100%;">Save Brew Log</button>
-</div>
-
-<hr style="margin: 30px 0;">
-
-<h2>Community Top Rated Brews</h2>
-<div id="brew-feed" style="display: flex; gap: 15px; flex-wrap: wrap;">
-    <p>Loading records...</p>
-</div>
-
-<script type="module" src="app.js"></script>
 </body>
 </html>

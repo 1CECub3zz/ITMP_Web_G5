@@ -4,7 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0bb3512c-cc95-4c41-8c71-69669806520e" name="更改" comment="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture." />
+    <list default="true" id="0bb3512c-cc95-4c41-8c71-69669806520e" name="更改" comment="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture.">
+      <change afterPath="$PROJECT_DIR$/add-brew.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/auth-guard.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/brew-details.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/controller-add.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/controller-dashboard.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/controller-details.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/controller-login.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/controller-records.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dashboard.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/records.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db-services.js" beforeDir="false" afterPath="$PROJECT_DIR$/db-services.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -99,6 +113,7 @@
       <workItem from="1779024503723" duration="68000" />
       <workItem from="1779024592907" duration="4422000" />
       <workItem from="1779076806241" duration="923000" />
+      <workItem from="1779097966379" duration="5739000" />
     </task>
     <task id="LOCAL-00001" summary="Update 17 May">
       <option name="closed" value="true" />
@@ -156,7 +171,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779077123226</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture.">
+      <option name="closed" value="true" />
+      <created>1779098013789</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1779098013790</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
