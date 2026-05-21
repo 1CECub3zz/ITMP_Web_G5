@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Brew - Echo Brews</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 20px;">
+
+<div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+
+    <button id="btn-back" style="background: none; border: none; color: #1976d2; cursor: pointer; padding: 0; margin-bottom: 20px; font-size: 16px;">
+        ← Back to Dashboard
+    </button>
+
+    <h2 style="color: #3e2723; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px;">Log a New Brew</h2>
+
+    <h4>Step 1: Basics</h4>
+    <input type="text" id="input-bean" placeholder="Bean/Tea Name (e.g., Ethiopian Yirgacheffe)" style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+    <input type="text" id="input-roaster" placeholder="Roaster (e.g., Onyx Coffee)" style="width: 100%; padding: 8px; margin-bottom: 20px; box-sizing: border-box;">
+
+    <h4>Step 2: Parameters</h4>
+    <select id="input-method" style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+        <option value="V60">Hario V60</option>
+        <option value="Aeropress">AeroPress</option>
+        <option value="Espresso">Espresso</option>
+        <option value="French Press">French Press</option>
+    </select>
+    <input type="number" id="input-dose" placeholder="Dose in grams (e.g., 15)" style="width: 100%; padding: 8px; margin-bottom: 20px; box-sizing: border-box;">
+
+    <h4>Step 3: Review</h4>
+    <input type="number" id="input-rating" placeholder="Rating (1-5)" min="1" max="5" style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+    <textarea id="input-comment" placeholder="Tasting notes (e.g., bright acidity, floral finish)..." rows="4" style="width: 100%; padding: 8px; margin-bottom: 20px; box-sizing: border-box;"></textarea>
+
+    <button id="btn-submit-brew" style="padding: 15px; font-size: 16px; background-color: #4e342e; color: #fff; border: none; border-radius: 6px; cursor: pointer; width: 100%;">
+        Save to Database
+    </button>
+</div>
+
+<script type="module" src="controller-add.js"></script>
+
+</body>
+</html>

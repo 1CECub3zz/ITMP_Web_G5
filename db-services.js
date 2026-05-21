@@ -1,20 +1,15 @@
 // db-services.js
 import { db, auth } from './firebase-config.js';
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 // ==========================================
-// Module 1: Create a New Brew Log (POST)
+// Module 1: Create a New Brew Log
 // ==========================================
 export async function submitBrewLog(brewData) {
     try {
-        console.log("🛠️ [Backend] Validating session and preparing nested data...");
         const currentUser = auth.currentUser;
+        if (!currentUser) return { success: false, errorMessage: "Authentication required." };
 
-        if (!currentUser) {
-            return { success: false, errorMessage: "Authentication required to log a brew." };
-        }
-
-        // Structuring the data based on the new Beverage Brewing ERD
         const docRef = await addDoc(collection(db, "brews"), {
             authorUid: currentUser.uid,
             isPublic: true,
@@ -27,50 +22,106 @@ export async function submitBrewLog(brewData) {
                 dose_grams: Number(brewData.dose) || 0
             },
             review: {
-                rating: Number(brewData.rating) || 0, // 1 to 5 scale
+                rating: Number(brewData.rating) || 0,
                 comment: brewData.comment || ""
             },
-            metrics: {
-                commentCount: 0 // Default starting value
-            },
+            metrics: { commentCount: 0 },
             createdAt: serverTimestamp()
         });
 
-        console.log("✅ [Backend] Brew log successfully recorded!");
         return { success: true, id: docRef.id };
-
     } catch (error) {
-        console.error("❌ [Backend] Failed to save brew log: ", error);
         return { success: false, errorMessage: error.message };
     }
 }
 
 // ==========================================
-// Module 2: Fetch Top Rated Brews (GET & SORT)
+// Module 2 & 3: Fetch Data (Top Rated & My Records)
 // ==========================================
 export async function getTopRatedBrews() {
     try {
-        console.log("📡 [Backend] Fetching top-rated brews from the community...");
-
-        // Advanced Query: Sort by nested field 'review.rating' in descending order
-        const q = query(
-            collection(db, "brews"),
-            orderBy("review.rating", "desc"),
-            limit(10) // Only fetch the top 10
-        );
-
+        const q = query(collection(db, "brews"), orderBy("review.rating", "desc"), limit(10));
         const querySnapshot = await getDocs(q);
         const brewsArray = [];
-
-        querySnapshot.forEach((doc) => {
-            brewsArray.push({ id: doc.id, ...doc.data() });
-        });
-
-        console.log(`✅ [Backend] Fetched ${brewsArray.length} top-rated brews.`);
+        querySnapshot.forEach((doc) => { brewsArray.push({ id: doc.id, ...doc.data() }); });
         return brewsArray;
+    } catch (error) { return []; }
+}
 
+export async function getMyBrews() {
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return [];
+        const q = query(collection(db, "brews"), where("authorUid", "==", currentUser.uid), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        const myBrewsArray = [];
+        querySnapshot.forEach((doc) => { myBrewsArray.push({ id: doc.id, ...doc.data() }); });
+        return myBrewsArray;
+    } catch (error) { return []; }
+}
+
+// ==========================================
+// Module 4: Fetch Single Brew by ID
+// ==========================================
+/**
+ * Black-box function: Retrieves the full details of a single brew using its ID.
+ */
+export async function getBrewById(brewId) {
+    try {
+        console.log(`📡 [Backend] Fetching exact brew details for ID: ${brewId}`);
+        const docRef = doc(db, "brews", brewId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        } else {
+            return null;
+        }
     } catch (error) {
-        console.error("❌ [Backend] Failed to fetch brews: ", error);
+        console.error("❌ [Backend] Single fetch failed: ", error);
+        return null;
+    }
+}
+
+// ==========================================
+// Module 5: Comment Engine (Write & Read)
+// ==========================================
+/**
+ * Black-box function: Adds a new comment to the distinct 'comments' collection.
+ */
+export async function addCommentToBrew(brewId, commentText) {
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return { success: false, errorMessage: "Must be logged in to comment." };
+
+        await addDoc(collection(db, "comments"), {
+            brewId: brewId,
+            authorUid: currentUser.uid,
+            text: commentText,
+            createdAt: serverTimestamp()
+        });
+        return { success: true };
+    } catch (error) {
+        return { success: false, errorMessage: error.message };
+    }
+}
+
+/**
+ * Black-box function: Fetches all comments linked to a specific brew ID.
+ */
+export async function getCommentsForBrew(brewId) {
+    try {
+        const q = query(
+            collection(db, "comments"),
+            where("brewId", "==", brewId),
+            orderBy("createdAt", "asc") // Oldest comments at the top
+        );
+        const querySnapshot = await getDocs(q);
+        const commentsArray = [];
+        querySnapshot.forEach((doc) => { commentsArray.push({ id: doc.id, ...doc.data() }); });
+        return commentsArray;
+    } catch (error) {
+        console.error("❌ [Backend] Failed to fetch comments: ", error);
         return [];
     }
 }
