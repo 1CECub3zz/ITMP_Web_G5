@@ -1,5 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { apiClient } from '@/api/localClient';
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/api/firebase-config'; 
 
 const AuthContext = createContext(null);
 
@@ -9,27 +10,34 @@ export function AuthProvider({ children }) {
   const [authChecked, setAuthChecked] = useState(false);
   const [authError, setAuthError] = useState(null);
 
-  const checkUserAuth = useCallback(async () => {
-    setIsLoadingAuth(true);
-    try {
-      const currentUser = await apiClient.auth.me();
-      setUser(currentUser);
-      setAuthError(currentUser ? null : { type: 'auth_required' });
+  useEffect(() => {
+    console.log("⚡ [Auth Guard] Deploying Firebase Live Listener...");
+    
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          full_name: firebaseUser.displayName || firebaseUser.email.split('@')[0], 
+        });
+        setAuthError(null);
+      } else {
+
+        setUser(null);
+        setAuthError({ type: 'auth_required' });
+      }
+      
       setAuthChecked(true);
-      return currentUser;
-    } catch (error) {
-      setUser(null);
-      setAuthError({ type: error.type || 'auth_required' });
-      setAuthChecked(true);
-      return null;
-    } finally {
       setIsLoadingAuth(false);
-    }
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    checkUserAuth();
-  }, [checkUserAuth]);
+  const checkUserAuth = useCallback(async () => {
+    return user; 
+  }, [user]);
 
   const value = useMemo(() => ({
     user,
@@ -39,7 +47,7 @@ export function AuthProvider({ children }) {
     authChecked,
     authError,
     checkUserAuth,
-  }), [authChecked, authError, checkUserAuth, isLoadingAuth, user]);
+  }), [authChecked, authError, isLoadingAuth, user, checkUserAuth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
