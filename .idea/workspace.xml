@@ -4,25 +4,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0bb3512c-cc95-4c41-8c71-69669806520e" name="更改" comment="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture.">
-      <change afterPath="$PROJECT_DIR$/add-brew.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-guard.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/brew-details.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/controller-add.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/controller-dashboard.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/controller-details.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/controller-login.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/controller-records.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dashboard.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/records.html" afterDir="false" />
+    <list default="true" id="0bb3512c-cc95-4c41-8c71-69669806520e" name="更改" comment="feat(architecture): implement secure multi-page routing and nested comment engine&#10;&#10;- Decoupled single-page testing environment into dedicated physical routes (dashboard, add-brew, records, brew-details).&#10;- Engineered `auth-guard.js` to enforce global session security and intercept unauthorized URL navigation.&#10;- Implemented dynamic URL parameter extraction (`?id=`) for precise single-document data fetching.&#10;- Developed a scalable One-to-Many NoSQL relational schema for the community comment engine.&#10;- Resolved asynchronous session restoration race conditions by transitioning to event-driven `onAuthStateChanged` observers.&#10;- docs: Compiled and appended the comprehensive mid-term Progress Report documenting systemic pivots and project milestones.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db-services.js" beforeDir="false" afterPath="$PROJECT_DIR$/db-services.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotChats">
+    <option name="panelChat">
+      <chat>
+        <option name="activeSessionId" value="2b432c55-50c6-46d0-9b15-ea59e7a96bf8" />
+        <option name="sessions">
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="2b432c55-50c6-46d0-9b15-ea59e7a96bf8" />
+            <option name="modeId" value="Ask" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+        </option>
+        <option name="type" value="PANEL" />
+      </chat>
+    </option>
   </component>
   <component name="CopilotPersistence">
     <persistenceIdMap>
@@ -83,14 +89,16 @@
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;JiaxianBranch&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_interpreter_path&quot;: &quot;C:/Users/Jiaxianzz/AppData/Roaming/JetBrains/WebStorm2026.1/node/versions/24.16.0/node&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;vcs.Git&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
@@ -98,7 +106,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3bd3a6803838-JavaScript-WS-261.22158.274" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.24374.125" />
       </set>
     </attachedChunks>
   </component>
@@ -113,7 +121,12 @@
       <workItem from="1779024503723" duration="68000" />
       <workItem from="1779024592907" duration="4422000" />
       <workItem from="1779076806241" duration="923000" />
-      <workItem from="1779097966379" duration="5739000" />
+      <workItem from="1779097966379" duration="6163000" />
+      <workItem from="1779243618678" duration="5000" />
+      <workItem from="1779244255280" duration="4000" />
+      <workItem from="1780455800406" duration="118000" />
+      <workItem from="1780455949408" duration="930000" />
+      <workItem from="1780456897893" duration="66000" />
     </task>
     <task id="LOCAL-00001" summary="Update 17 May">
       <option name="closed" value="true" />
@@ -179,7 +192,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779098013790</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="feat(architecture): implement secure multi-page routing and nested comment engine&#10;&#10;- Decoupled single-page testing environment into dedicated physical routes (dashboard, add-brew, records, brew-details).&#10;- Engineered `auth-guard.js` to enforce global session security and intercept unauthorized URL navigation.&#10;- Implemented dynamic URL parameter extraction (`?id=`) for precise single-document data fetching.&#10;- Developed a scalable One-to-Many NoSQL relational schema for the community comment engine.&#10;- Resolved asynchronous session restoration race conditions by transitioning to event-driven `onAuthStateChanged` observers.&#10;- docs: Compiled and appended the comprehensive mid-term Progress Report documenting systemic pivots and project milestones.">
+      <option name="closed" value="true" />
+      <created>1779108932662</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1779108932662</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -189,7 +210,8 @@
     <MESSAGE value="Update 17 May" />
     <MESSAGE value="feat(backend): integrate firebase auth with firestore and implement server-side category filtering&#10;&#10;- Eradicated hardcoded seller metadata by dynamically binding `sellerUid` to `auth.currentUser.uid`.&#10;- Implemented a global authentication session observer using `onAuthStateChanged` to secure database write operations.&#10;- Added developer authentication simulation tools (`signInAnonymously` and `signOut`) within the test environment.&#10;- Engineered server-side query filtration logic (`getListingsByCategory`) and single-document retrieval (`getListingById`).&#10;- Resolved index latency by provisioning cloud-side B-Tree Composite Indexes for compound state queries.&#10;- Updated all core scripts (`firebase-config.js`, `db-services.js`, `test.js`, `app.js`) to full-text English documentation standards." />
     <MESSAGE value="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture." />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor!(database): complete architectural pivot to beverage brewing system&#10;&#10;- Transitioned system domain from e-commerce to a specialized NoSQL beverage brewing log.&#10;- Redesigned Firestore schema to utilize complex nested data maps (`basics`, `parameters`, `review`).&#10;- Engineered `submitBrewLog` API enforcing strict authentication checks and user UID binding.&#10;- Implemented `getTopRatedBrews` logic using server-side `orderBy` index sorting for dynamic leaderboards.&#10;- Overhauled `index.html` and `app.js` to construct the new data ingestion pipeline and UI rendering.&#10;- Rewrote `README.md` to reflect the new project scope, core features, and updated team roles.&#10;&#10;BREAKING CHANGE: The previous marketplace UI, `listings` collection, and related APIs are completely deprecated and replaced by the `brews` architecture." />
+    <MESSAGE value="feat(architecture): implement secure multi-page routing and nested comment engine&#10;&#10;- Decoupled single-page testing environment into dedicated physical routes (dashboard, add-brew, records, brew-details).&#10;- Engineered `auth-guard.js` to enforce global session security and intercept unauthorized URL navigation.&#10;- Implemented dynamic URL parameter extraction (`?id=`) for precise single-document data fetching.&#10;- Developed a scalable One-to-Many NoSQL relational schema for the community comment engine.&#10;- Resolved asynchronous session restoration race conditions by transitioning to event-driven `onAuthStateChanged` observers.&#10;- docs: Compiled and appended the comprehensive mid-term Progress Report documenting systemic pivots and project milestones." />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(architecture): implement secure multi-page routing and nested comment engine&#10;&#10;- Decoupled single-page testing environment into dedicated physical routes (dashboard, add-brew, records, brew-details).&#10;- Engineered `auth-guard.js` to enforce global session security and intercept unauthorized URL navigation.&#10;- Implemented dynamic URL parameter extraction (`?id=`) for precise single-document data fetching.&#10;- Developed a scalable One-to-Many NoSQL relational schema for the community comment engine.&#10;- Resolved asynchronous session restoration race conditions by transitioning to event-driven `onAuthStateChanged` observers.&#10;- docs: Compiled and appended the comprehensive mid-term Progress Report documenting systemic pivots and project milestones." />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
