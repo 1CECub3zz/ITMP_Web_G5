@@ -5,55 +5,79 @@ import { format } from 'date-fns';
 import { ChevronLeft, ChevronRight, Eye, MessageSquare, Search } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import StarRating from '@/components/ui/StarRating';
-import { apiClient } from '@/api/localClient';
+
+import { getTopRatedBrews, searchCommunityBrews } from '@/api/db-services'; 
+
 import { BREW_PLACEHOLDER_ICONS, BREW_TYPES } from '@/lib/brewMeta';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/I18nContext';
 
 const PAGE_SIZE = 6;
 
+const mapBackendToFrontend = (cloudBrews) => {
+  return cloudBrews.map(brew => ({
+    id: brew.id,
+    name: brew.basics?.beanName || 'Unknown Brew',
+    owner_name: brew.authorName || 'Community Brewer',
+    type: brew.basics?.roaster || 'pourover', 
+    method: brew.parameters?.method || 'V60',
+    brew_date: brew.createdAt ? brew.createdAt.toDate().toISOString() : new Date().toISOString(),
+    rating: brew.review?.rating || 0,
+    image_url: brew.imageUrl || null,
+    commentCount: brew.metrics?.commentCount || 0 
+  }));
+};
+
 export default function CommunityRecipes() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useI18n();
+  
   const [brews, setBrews] = useState([]);
-  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const loadCommunityData = async () => {
-      const [allBrews, allComments] = await Promise.all([
-        apiClient.entities.Brew.listAll('-created_date', 500),
-        apiClient.entities.Comment.listAll('-created_date', 1000),
-      ]);
-      setBrews(allBrews.filter((brew) => brew.owner_email !== user?.email));
-      setComments(allComments);
-      setLoading(false);
+    let isMounted = true;
+
+    const fetchCloudData = async () => {
+      setLoading(true);
+      try {
+        let fetchedBrews = [];
+        
+        if (!search.trim() && typeFilter === 'all') {
+           fetchedBrews = await getTopRatedBrews();
+        } else {
+          
+           fetchedBrews = await searchCommunityBrews(search, typeFilter, 0);
+        }
+
+        if (!isMounted) return;
+
+        const othersBrews = fetchedBrews.filter(brew => brew.authorUid !== user?.uid && brew.authorEmail !== user?.email);
+
+        setBrews(mapBackendToFrontend(othersBrews));
+      } catch (error) {
+        console.error("❌ Failed to fetch community recipes from Cloud:", error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     };
 
-    loadCommunityData();
-  }, [user?.email]);
+    const delayDebounceFn = setTimeout(() => {
+      fetchCloudData();
+    }, 400);
 
-  const commentCounts = comments.reduce((counts, comment) => {
-    counts[comment.brew_id] = (counts[comment.brew_id] || 0) + 1;
-    return counts;
-  }, {});
+    return () => {
+      isMounted = false;
+      clearTimeout(delayDebounceFn);
+    };
+  }, [user?.uid, user?.email, search, typeFilter]);
 
-  const filteredBrews = brews.filter((brew) => {
-    const matchSearch =
-      !search ||
-      brew.name.toLowerCase().includes(search.toLowerCase()) ||
-      (brew.ingredients || '').toLowerCase().includes(search.toLowerCase()) ||
-      (brew.owner_name || '').toLowerCase().includes(search.toLowerCase());
-    const matchType = typeFilter === 'all' || brew.type === typeFilter;
-    return matchSearch && matchType;
-  });
-
-  const totalPages = Math.ceil(filteredBrews.length / PAGE_SIZE);
-  const paginatedBrews = filteredBrews.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.ceil(brews.length / PAGE_SIZE);
+  const paginatedBrews = brews.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,7 +118,7 @@ export default function CommunityRecipes() {
           </div>
 
           <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-            <span>{t('community.recipeCount', { count: filteredBrews.length })}</span>
+            <span>{t('community.recipeCount', { count: brews.length })}</span>
           </div>
 
           <div className="border-2 border-primary/20 rounded-2xl overflow-hidden bg-card">
@@ -147,21 +171,21 @@ export default function CommunityRecipes() {
                           </div>
                           <div>
                             <p className="font-medium">{brew.name}</p>
-                            <p className="text-xs text-muted-foreground md:hidden">{t('community.sharedBy', { name: brew.owner_name || 'Brewer' })}</p>
+                            <p className="text-xs text-muted-foreground md:hidden">{t('community.sharedBy', { name: brew.owner_name })}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{brew.owner_name || 'Brewer'}</td>
+                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{brew.owner_name}</td>
                       <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{t(`types.${brew.type}`)}</td>
                       <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{brew.method ? t(`methods.${brew.method}`) : '—'}</td>
                       <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">
-                        {brew.brew_date ? format(new Date(brew.brew_date), 'd MMM yyyy') : format(new Date(brew.created_date), 'd MMM yyyy')}
+                        {format(new Date(brew.brew_date), 'd MMM yyyy')}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <StarRating value={brew.rating || 0} readonly size={14} />
                           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                            <MessageSquare size={12} /> {commentCounts[brew.id] || 0}
+                            <MessageSquare size={12} /> {brew.commentCount}
                           </span>
                         </div>
                       </td>
@@ -185,7 +209,7 @@ export default function CommunityRecipes() {
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
-              <span>{t('records.showing', { start: (page - 1) * PAGE_SIZE + 1, end: Math.min(page * PAGE_SIZE, filteredBrews.length), total: filteredBrews.length })}</span>
+              <span>{t('records.showing', { start: (page - 1) * PAGE_SIZE + 1, end: Math.min(page * PAGE_SIZE, brews.length), total: brews.length })}</span>
               <div className="flex items-center gap-1">
                 <button onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))} disabled={page === 1} className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-40">
                   <ChevronLeft size={16} />
