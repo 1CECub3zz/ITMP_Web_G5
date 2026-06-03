@@ -1,4 +1,3 @@
-// src/pages/Records.jsx
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -9,16 +8,14 @@ import StarRating from '@/components/ui/StarRating';
 import { useToast } from '@/components/ui/use-toast';
 import { useI18n } from '@/lib/I18nContext';
 
-// 💥 1. 引入总架构师的真实云端 API
 import { getMyBrews, deleteBrewLog } from '@/api/db-services';
 import { BREW_PLACEHOLDER_ICONS } from '@/lib/brewMeta';
 
-// 💥 2. BFF 数据适配器：抹平 NoSQL 嵌套结构与 React UI 的差异
 const mapBackendToFrontend = (cloudBrews) => {
   return cloudBrews.map(brew => ({
     id: brew.id,
     name: brew.basics?.beanName || 'Unknown Brew',
-    type: brew.basics?.roaster || 'pourover', // 用 roaster 充当 UI 上的大类
+    type: brew.basics?.roaster || 'pourover',
     method: brew.parameters?.method || 'V60',
     brew_date: brew.createdAt ? brew.createdAt.toDate().toISOString() : new Date().toISOString(),
     rating: brew.review?.rating || 0,
@@ -36,7 +33,6 @@ export default function Records() {
   // 防止重复点击删除的锁定状态
   const [deletingId, setDeletingId] = useState(null); 
 
-  // 💥 3. 生命周期：挂载时拉取个人真实数据
   useEffect(() => {
     let isMounted = true;
     const fetchMyRecords = async () => {
@@ -58,19 +54,18 @@ export default function Records() {
     return () => { isMounted = false; };
   }, [toast]);
 
-  // 💥 4. 核心安全删除逻辑 (Optimistic UI Update)
   const handleDelete = async (brewId) => {
     const isConfirmed = window.confirm("⚠️ Are you sure you want to permanently delete this brew? This action cannot be undone.");
     if (!isConfirmed) return;
 
-    setDeletingId(brewId); // 锁定当前卡片的 UI 状态
+    setDeletingId(brewId);
     
     try {
-      // 触发具有绝对防御规则 (UID验证) 的云端物理擦除
+
       const result = await deleteBrewLog(brewId);
       
       if (result.success) {
-        // 🚀 乐观更新：不在重新拉取服务器，直接在内存中过滤掉该项，触发退场动画
+
         setBrews(prev => prev.filter(brew => brew.id !== brewId));
         toast({ description: "🗑️ Record permanently deleted." });
       } else {
@@ -79,7 +74,7 @@ export default function Records() {
     } catch (error) {
       toast({ variant: 'destructive', description: "Delete failed: " + error.message });
     } finally {
-      setDeletingId(null); // 解除锁定
+      setDeletingId(null); 
     }
   };
 
@@ -90,7 +85,6 @@ export default function Records() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="font-playfair text-3xl font-bold mb-6">My Brew Records</h1>
 
-          {/* 渲染数据列表 */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence>
               {loading ? (
@@ -119,7 +113,6 @@ export default function Records() {
                     transition={{ delay: index * 0.05 }}
                     className="border border-border bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow relative flex flex-col"
                   >
-                    {/* 卡片图片区域 */}
                     <div className="h-32 bg-muted relative overflow-hidden flex justify-center items-center">
                       {brew.image_url ? (
                         <img src={brew.image_url} alt="Brew" className="w-full h-full object-cover" />
@@ -127,8 +120,7 @@ export default function Records() {
                         <span className="text-4xl opacity-50">{BREW_PLACEHOLDER_ICONS[brew.type] || '☕'}</span>
                       )}
                     </div>
-                    
-                    {/* 卡片信息区域 */}
+
                     <div className="p-4 flex-grow flex flex-col">
                       <h3 className="font-bold text-lg mb-1">{brew.name}</h3>
                       <p className="text-xs text-muted-foreground mb-3">
@@ -137,8 +129,7 @@ export default function Records() {
                       <div className="mb-4">
                         <StarRating value={brew.rating} readonly size={16} />
                       </div>
-                      
-                      {/* 交互按钮组 */}
+
                       <div className="flex gap-2 mt-auto pt-4 border-t border-border">
                         <button 
                            onClick={() => navigate(`/brew/${brew.id}`)}
@@ -146,8 +137,7 @@ export default function Records() {
                         >
                           <Eye size={16} /> View
                         </button>
-                        
-                        {/* 💥 触发安全删除的按钮 */}
+
                         <button 
                            onClick={() => handleDelete(brew.id)}
                            disabled={deletingId === brew.id}
