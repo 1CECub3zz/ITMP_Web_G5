@@ -1,36 +1,38 @@
-# ☕ Echo - Web-based Beverage Brewing & Review System
+# ☕ BrewTrack
+**A Web-based Beverage Brewing & Review System**
 
-> A dedicated platform for coffee and tea enthusiasts to log parameters, track recipes, and share reviews.
-> Developed for the FIT3081 IT Mini Project (Foundation Level).
+Welcome to the official repository for **BrewTrack**, a centralized, cloud-based platform designed to replace physical notebooks. It empowers beverage enthusiasts, baristas, and casual brewers to log, track, and share intricate brewing parameters (e.g., dose, yield, temperature, methods) with a global community.
 
-![HTML5](https://img.shields.io/badge/Frontend-HTML5%20%7C%20CSS3-orange)
-![JavaScript](https://img.shields.io/badge/Logic-Vanilla%20JS%20(ES6)-yellow)
-![Firebase](https://img.shields.io/badge/Backend-Google%20Firebase-FFCA28)
-![Architecture](https://img.shields.io/badge/Architecture-Serverless%20BaaS-blue)
+---
 
-## 📖 Project Overview
-Echo is a specialized brewing log and review system. It replaces scattered physical notebooks with a centralized, cloud-based platform. Users can meticulously record their brewing parameters (dose, yield, temperature, method), rate their cups, and explore top-rated recipes from the community.
+## 🏗️ System Architecture
+To achieve an optimal balance between a highly interactive user interface and robust database security, this project employs a **Decoupled Hybrid Architecture**.
+
+* **Presentation Layer (Frontend):** Constructed utilizing **React.js** and **Tailwind CSS**. This allows for complex state management, responsive pagination, dynamic filtering, and fluid UI animations.
+* **Data Service Layer (Backend):** Engineered using **Vanilla JavaScript (ES6 Modules)** and **Google Firebase (Firestore & Authentication)**. This independent API layer acts as a secure intermediary black-box, encapsulating all database writes, schema validation, and authentication lifecycles without UI interference.
+
+This strict **Separation of Concerns (SoC)** ensures the frontend remains lightweight, while the backend securely handles high-concurrency cloud operations.
+
+---
 
 ## ✨ Core Features
-- **Serverless Architecture:** Driven by Vanilla JavaScript and Google Firebase.
-- **Nested Data Logging:** Complex NoSQL schema handling nested metrics (`basics`, `parameters`, `review`).
-- **Authentication:** Secure user sessions via Firebase Anonymous/Email Auth.
-- **Dynamic Leaderboards:** Server-side sorting for top-rated community brews.
+* **Global Authentication Guard:** Event-driven session monitoring (`onAuthStateChanged`) that actively protects private routes and redirects unauthorized access.
+* **Multi-Step Data Ingestion:** A streamlined wizard for users to input precise brewing telemetry (Basics, Parameters, and Reviews).
+* **Community Leaderboard & Archives:** Dynamic data rendering utilizing Firestore server-side compound indexes for optimal querying performance.
+* **Nested Comment Engine:** A scalable One-to-Many relational NoSQL schema linking specific community comments to individual brew logs without breaching single-document size limits (1MB).
+* **Internationalization (i18n):** Full web page translation support mapping UI labels and feedback messages seamlessly.
 
-## 🛠️ Technology Stack
-* **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6 Modules)
-* **Backend BaaS:** Google Firebase (Auth, Cloud Firestore)
-* **Design:** Figma, Draw.io
+---
 
-## 📂 Architecture & Schema
-The system utilizes a denormalized NoSQL document structure:
-- `users`: Stores user metadata and total brew counts.
-- `brews`: The core collection featuring nested maps for `basics`, `parameters`, and `reviews`.
-- `comments`: A sub-system for community interactions on specific brews.
+## 🗄️ Database Schema (NoSQL Firestore)
+The system operates on a denormalized database structure leveraging two primary collections:
+1. `brews`: Stores high-granularity brewing logs using complex nested maps (`basics`, `parameters`, `review`).
+2. `comments`: A decoupled collection structurally bound to specific recipes via a `brewId` foreign key, neutralizing array-append bottlenecks.
 
-## 👥 Team Echo (Group 5)
-* **Member 1:** Project Manager & Systems Analyst
-* **Member 2:** UI/UX Lead
-* **Member 3:** Frontend Builder
-* **Member 4:** Core Database Integrator (NoSQL Schema, Read/Write APIs)
-* **Member 5:** Auth & Real-Time Specialist
+---
+
+
+## 🚀 Quick Start / Installation
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/your-repo-link/brewtrack.git](https://github.com/your-repo-link/brewtrack.git)
