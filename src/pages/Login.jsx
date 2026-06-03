@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { apiClient } from '@/api/localClient';
+import { loginWithEmail, loginWithGoogleAuth } from '@/api/db-services'; 
+
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import RippleButton from '@/components/ui/RippleButton';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/I18nContext';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { checkUserAuth } = useAuth();
   const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,10 +21,18 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
+    
     try {
-      await apiClient.auth.loginViaEmailPassword(email, password);
-      await checkUserAuth();
-      navigate('/', { replace: true });
+
+      const result = await loginWithEmail(email, password);
+      
+      if (result.success) {
+
+        navigate('/', { replace: true });
+      } else {
+
+        setError(result.errorMessage || t('auth.invalidCredentials'));
+      }
     } catch (err) {
       setError(t('auth.invalidCredentials'));
     } finally {
@@ -34,9 +41,13 @@ export default function Login() {
   };
 
   const handleGoogle = async () => {
-    const { redirectPath } = await apiClient.auth.loginWithProvider('google', '/');
-    await checkUserAuth();
-    navigate(redirectPath, { replace: true });
+    setError('');
+    const result = await loginWithGoogleAuth();
+    if (result.success) {
+      navigate('/', { replace: true });
+    } else {
+      setError(result.errorMessage);
+    }
   };
 
   return (
@@ -60,7 +71,7 @@ export default function Login() {
             <p className="text-muted-foreground text-sm mt-1">{t('auth.signInTitle')}</p>
           </div>
 
-          {/* Google */}
+          {/* Google Button */}
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -126,6 +137,6 @@ export default function Login() {
           </div>
         </motion.div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
