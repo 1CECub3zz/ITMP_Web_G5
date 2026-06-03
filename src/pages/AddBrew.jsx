@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { apiClient } from '@/api/localClient';
+import { uploadBrewImage, submitBrewLog } from '@/api/db-services';
 import Navbar from '@/components/layout/Navbar';
 import RippleButton from '@/components/ui/RippleButton';
 import StarRating from '@/components/ui/StarRating';
@@ -40,13 +40,18 @@ export default function AddBrew() {
     if (!file) return;
     try {
       setUploadingImage(true);
-      const { file_ref, file_url } = await apiClient.integrations.Core.UploadFile({ file });
-      setForm((current) => ({ ...current, image_ref: file_ref, image_url: file_url }));
-      toast({ description: t('status.photoUploaded') });
+      const uploadResult = await uploadBrewImage(file);
+      
+      if (uploadResult.success) {
+        setForm((current) => ({ ...current, image_url: uploadResult.url }));
+        toast({ description: t('status.photoUploaded') });
+      } else {
+        throw new Error(uploadResult.errorMessage);
+      }
     } catch (error) {
       toast({
         variant: 'destructive',
-        description: error.code === 'video_too_large' ? t('errors.videoTooLarge') : t('addBrew.uploadFailed'),
+        description: t('addBrew.uploadFailed') + ": " + error.message,
       });
     } finally {
       setUploadingImage(false);
@@ -76,21 +81,27 @@ export default function AddBrew() {
   const handleSubmit = async () => {
     try {
       setSaving(true);
-      const prevBrews = await apiClient.entities.Brew.list('-created_date', 200);
-      const prevEarned = new Set(getEarnedBadges(prevBrews).map(b => b.id));
-      await apiClient.entities.Brew.create({
-        ...form,
-        temperature: form.temperature ? Number(form.temperature) : undefined,
-        rating: form.rating || undefined,
-      });
-      const newBrews = await apiClient.entities.Brew.list('-created_date', 200);
-      const newEarned = getEarnedBadges(newBrews);
-      const unlocked = newEarned.find(b => !prevEarned.has(b.id));
-      setSuccess(true);
-      if (unlocked) { setNewBadge(unlocked); setTimeout(() => navigate('/records'), 3800); }
-      else setTimeout(() => navigate('/records'), 1500);
-    } catch {
-      toast({ variant: 'destructive', description: t('addBrew.saveFailed') });
+      
+      const backendPayload = {
+          beanName: form.name,
+          roaster: form.type || "Unknown Roaster",
+          method: form.method,
+          dose_grams: form.ingredients || "0", 
+          rating: form.rating || 0,
+          comment: form.notes || "",
+          imageUrl: form.image_url || null
+      };
+
+      const result = await submitBrewLog(backendPayload);
+
+      if (result.success) {
+          setSuccess(true);
+          setTimeout(() => navigate('/records'), 1500);
+      } else {
+          throw new Error(result.errorMessage);
+      }
+    } catch (error) {
+      toast({ variant: 'destructive', description: t('addBrew.saveFailed') + error.message });
     } finally {
       setSaving(false);
     }
