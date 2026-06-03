@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, LogOut, User } from 'lucide-react';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { useI18n } from '@/lib/I18nContext';
+import { logoutUser } from '@/api/db-services';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     const { redirectPath } = apiClient.auth.logout('/welcome');
     await checkUserAuth();
+    await logoutUser();
     navigate(redirectPath, { replace: true });
   };
 
