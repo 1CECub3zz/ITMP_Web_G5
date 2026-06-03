@@ -31,6 +31,7 @@ The system operates on a denormalized database structure leveraging two primary 
 
 ---
 
+
 ## 🚀 Quick Start / Installation
 1. Clone the repository:
    ```bash
