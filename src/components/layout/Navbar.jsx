@@ -1,20 +1,20 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/lib/AuthContext';
-import { apiClient } from '@/api/localClient';
 import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, LogOut, User } from 'lucide-react';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { useI18n } from '@/lib/I18nContext';
+import { useAuth } from '@/lib/AuthContext';
 import { logoutUser } from '@/api/db-services';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, checkUserAuth } = useAuth();
+  const { user } = useAuth(); 
   const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  
   const navLinks = [
     { label: t('nav.dashboard'), path: '/' },
     { label: t('nav.addBrew'), path: '/add-brew' },
@@ -27,10 +27,14 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = async () => {
-    const { redirectPath } = apiClient.auth.logout('/welcome');
-    await checkUserAuth();
-    await logoutUser();
-    navigate(redirectPath, { replace: true });
+    try {
+
+      await logoutUser();
+
+      navigate('/welcome', { replace: true });
+    } catch (error) {
+      console.error("❌ Logout failed:", error);
+    }
   };
 
   return (
