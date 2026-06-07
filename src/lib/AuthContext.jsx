@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/api/firebase-config'; 
+import { auth } from '@/api/firebase-config';
 
 const AuthContext = createContext(null);
 
@@ -11,23 +11,18 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
-    console.log("⚡ [Auth Guard] Deploying Firebase Live Listener...");
-    
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-
         setUser({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
-          full_name: firebaseUser.displayName || firebaseUser.email.split('@')[0], 
+          full_name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
         });
         setAuthError(null);
       } else {
-
         setUser(null);
         setAuthError({ type: 'auth_required' });
       }
-      
       setAuthChecked(true);
       setIsLoadingAuth(false);
     });
@@ -36,7 +31,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const checkUserAuth = useCallback(async () => {
-    return user; 
+    return user;
   }, [user]);
 
   const value = useMemo(() => ({
@@ -54,8 +49,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 }

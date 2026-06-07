@@ -1,145 +1,131 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/lib/AuthContext';
-import { apiClient } from '@/api/localClient';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, Star, MessageSquare, TrendingUp, Plus, Award } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Plus, BookOpen, Trophy, Users, Coffee, TrendingUp, Award, Clock } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
-import BrewCard from '@/components/brew/BrewCard';
-import RippleButton from '@/components/ui/RippleButton';
-import BadgeGrid from '@/components/badges/BadgeGrid';
-import BadgeUnlockToast from '@/components/badges/BadgeUnlockToast';
+import { useAuth } from '@/lib/AuthContext';
 import { getEarnedBadges } from '@/lib/badges';
 import { useI18n } from '@/lib/I18nContext';
+
+// 💥 引入真实 API
+import { getMyBrews } from '@/api/db-services';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t } = useI18n();
-  const [brews, setBrews] = useState([]);
-  const [comments, setComments] = useState([]);
+  const [stats, setStats] = useState({
+    totalBrews: 0,
+    avgRating: 0,
+    earnedBadges: 0,
+    recentBrews: []
+  });
   const [loading, setLoading] = useState(true);
-  const [newBadge, setNewBadge] = useState(null);
-  const prevBadgeCount = useState(0);
 
-  const loadData = async () => {
-    const [b, c] = await Promise.all([
-      apiClient.entities.Brew.list('-created_date', 200),
-      apiClient.entities.Comment.list('-created_date', 100),
-    ]);
-    setBrews(b);
-    setComments(c);
-    setLoading(false);
-  };
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDashboardData = async () => {
+      if (!user) return;
+      try {
+        // 💥 核心云端计算
+        const myCloudBrews = await getMyBrews();
 
-  useEffect(() => { loadData(); }, []);
+        if (!isMounted) return;
 
-  const totalBrews = brews.length;
-  const favourites = brews.filter((b) => b.is_favourite).length;
-  const rated = brews.filter((b) => b.rating);
-  const avgRating = rated.length ? (rated.reduce((a, b) => a + b.rating, 0) / rated.length).toFixed(1) : '—';
-  const totalComments = comments.length;
-  const recentBrews = brews.slice(0, 4);
-  const earnedBadges = getEarnedBadges(brews);
+        const total = myCloudBrews.length;
+        const avg = total > 0
+            ? (myCloudBrews.reduce((acc, brew) => acc + (brew.review?.rating || 0), 0) / total).toFixed(1)
+            : 0;
 
-  const stats = [
-    { label: t('dashboard.favourites'), value: favourites, icon: Heart, trend: '+2 from last week', color: 'text-red-400' },
-    { label: t('dashboard.avgRating'), value: avgRating, icon: Star, trend: '+0.5 from last week', color: 'text-brew-gold', star: true },
-    { label: t('dashboard.comments'), value: totalComments, icon: MessageSquare, trend: '+1 from last week', color: 'text-blue-400' },
+        // 映射供勋章系统计算
+        const mappedForBadges = myCloudBrews.map(b => ({
+          type: b.basics?.roaster || 'pourover',
+          method: b.parameters?.method || 'V60',
+          rating: b.review?.rating || 0
+        }));
+
+        setStats({
+          totalBrews: total,
+          avgRating: avg,
+          earnedBadges: getEarnedBadges(mappedForBadges).length,
+          recentBrews: myCloudBrews.slice(0, 3) // 取最近3条
+        });
+      } catch (error) {
+        console.error("Dashboard cloud sync failed:", error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    fetchDashboardData();
+    return () => { isMounted = false; };
+  }, [user]);
+
+  const statCards = [
+    { label: t('dashboard.totalBrews'), value: stats.totalBrews.toString(), icon: Coffee, color: 'text-blue-500', bg: 'bg-blue-50' },
+    { label: t('dashboard.avgRating'), value: stats.avgRating.toString(), icon: TrendingUp, color: 'text-green-500', bg: 'bg-green-50' },
+    { label: t('dashboard.badgesEarned'), value: stats.earnedBadges.toString(), icon: Award, color: 'text-amber-500', bg: 'bg-amber-50' },
+    { label: t('dashboard.timeBrewing'), value: `${stats.totalBrews * 3}m`, icon: Clock, color: 'text-purple-500', bg: 'bg-purple-50' },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col lg:flex-row gap-6 mb-8">
-          {/* Welcome card */}
-          <div className="bg-card border border-border rounded-2xl p-6 min-w-[220px]">
-            <h2 className="font-playfair text-2xl font-bold mb-1">{t('dashboard.welcomeBack', { name: user?.full_name?.split(' ')[0] || 'Brewer' })}</h2>
-            <p className="text-muted-foreground text-sm mb-4">{t('dashboard.subtitle')}</p>
-            <div className="bg-secondary rounded-xl p-4 mb-4">
-              <p className="font-playfair text-4xl font-bold text-brew-green">{totalBrews}</p>
-              <p className="text-sm text-muted-foreground">{t('dashboard.totalBrews')}</p>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="max-w-6xl mx-auto px-4 py-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="font-playfair text-3xl font-bold">{t('dashboard.welcome')}, {user?.full_name?.split(' ')[0]}</h1>
+              <p className="text-muted-foreground mt-1">{t('dashboard.subtitle')}</p>
             </div>
-            <RippleButton onClick={() => navigate('/add-brew')} className="w-full flex items-center justify-center gap-2">
-              <Plus size={16} /> {t('dashboard.addNew')}
-            </RippleButton>
-          </div>
-
-          {/* Stats */}
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.1 }}
-                className="bg-card border border-border rounded-2xl p-6 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <stat.icon size={18} className={stat.color} />
-                  </div>
-                  <p className="font-playfair text-4xl font-bold">
-                    {stat.value}
-                    {stat.star && stat.value !== '—' && <span className="text-brew-gold text-2xl ml-1">★</span>}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
-                </div>
-                <div className="flex items-center gap-1 mt-3 text-xs text-brew-green-light">
-                  <TrendingUp size={12} /> {stat.trend}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Badges section */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card border border-border rounded-2xl p-5 mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Award size={18} className="text-brew-green" />
-              <h3 className="font-playfair text-lg font-bold">{t('dashboard.yourBadges')}</h3>
-            </div>
-            <button onClick={() => navigate('/badges')} className="text-sm text-brew-green font-medium hover:underline">{t('common.viewAll')} →</button>
-          </div>
-          <BadgeGrid earned={earnedBadges} showLocked={false} compact />
-        </motion.div>
-
-        {/* Recent Brews */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-playfair text-xl font-bold">{t('dashboard.recentBrews')}</h3>
-          <button
-            onClick={() => navigate('/records')}
-            className="text-sm text-brew-green font-medium hover:underline flex items-center gap-1"
-          >
-            {t('common.viewAll')} →
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="bg-card rounded-2xl h-56 animate-pulse" />
-            ))}
-          </div>
-        ) : recentBrews.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 text-muted-foreground">
-            <p className="text-4xl mb-3">☕</p>
-            <p className="font-medium">{t('dashboard.noBrews')}</p>
-            <RippleButton onClick={() => navigate('/add-brew')} className="mt-4">{t('dashboard.addFirstBrew')}</RippleButton>
+            <button onClick={() => navigate('/add-brew')} className="bg-brew-green hover:bg-brew-green/90 text-white px-6 py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors shadow-sm">
+              <Plus size={20} /> {t('dashboard.logNewBrew')}
+            </button>
           </motion.div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {recentBrews.map((brew, i) => (
-              <motion.div key={brew.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-                <BrewCard brew={brew} onUpdate={loadData} />
-              </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {statCards.map((stat, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="bg-card border border-border p-4 rounded-2xl flex flex-col justify-between">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color}`}>
+                      <stat.icon size={20} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{loading ? '-' : stat.value}</p>
+                    <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+                  </div>
+                </motion.div>
             ))}
           </div>
-        )}
-      </main>
-    <BadgeUnlockToast badge={newBadge} onDone={() => setNewBadge(null)} />
-    </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="md:col-span-2 space-y-6">
+              <h2 className="font-playfair text-xl font-bold">{t('dashboard.quickActions')}</h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Link to="/records" className="group p-6 bg-card border border-border rounded-2xl hover:border-brew-green/50 hover:shadow-md transition-all">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <BookOpen size={24} />
+                  </div>
+                  <h3 className="font-bold text-lg mb-1">{t('dashboard.myRecords')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('dashboard.myRecordsDesc')}</p>
+                </Link>
+                <Link to="/community" className="group p-6 bg-card border border-border rounded-2xl hover:border-brew-green/50 hover:shadow-md transition-all">
+                  <div className="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Users size={24} />
+                  </div>
+                  <h3 className="font-bold text-lg mb-1">{t('dashboard.community')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('dashboard.communityDesc')}</p>
+                </Link>
+                <Link to="/badges" className="group p-6 bg-card border border-border rounded-2xl hover:border-brew-green/50 hover:shadow-md transition-all sm:col-span-2">
+                  <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Trophy size={24} />
+                  </div>
+                  <h3 className="font-bold text-lg mb-1">{t('dashboard.achievements')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('dashboard.achievementsDesc')}</p>
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </main>
+      </div>
   );
 }
