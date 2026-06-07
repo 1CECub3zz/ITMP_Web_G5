@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 30% 96%;
+    --foreground: 30 15% 15%;
+    --card: 38 35% 98%;
+    --card-foreground: 30 15% 15%;
+    --popover: 38 35% 98%;
+    --popover-foreground: 30 15% 15%;
+    --primary: 150 35% 25%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 38 30% 90%;
+    --secondary-foreground: 30 15% 20%;
+    --muted: 38 25% 92%;
+    --muted-foreground: 30 10% 50%;
+    --accent: 150 30% 35%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 38 20% 85%;
+    --input: 38 20% 88%;
+    --ring: 150 35% 25%;
+    --radius: 0.75rem;
+    --brew-cream: 38 40% 94%;
+    --brew-green: 150 35% 25%;
+    --brew-green-light: 150 30% 40%;
+    --brew-brown: 25 40% 35%;
+    --brew-gold: 42 80% 55%;
+  }
+
+  .dark {
+    --background: 30 15% 8%;
+    --foreground: 38 20% 92%;
+    --card: 30 12% 12%;
+    --card-foreground: 38 20% 92%;
+    --popover: 30 12% 12%;
+    --popover-foreground: 38 20% 92%;
+    --primary: 150 35% 45%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 30 12% 18%;
+    --secondary-foreground: 38 20% 85%;
+    --muted: 30 10% 20%;
+    --muted-foreground: 38 15% 55%;
+    --accent: 150 30% 40%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 12% 22%;
+    --input: 30 12% 22%;
+    --ring: 150 35% 45%;
+  }
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  body { @apply bg-background text-foreground font-inter; }
+}
+
+@layer utilities {
+  .font-playfair { font-family: 'Playfair Display', serif; }
+  .font-inter { font-family: 'Inter', sans-serif; }
+}
