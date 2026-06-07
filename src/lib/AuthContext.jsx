@@ -12,27 +12,32 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          full_name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-        });
-        setAuthError(null);
-      } else {
-        setUser(null);
-        setAuthError({ type: 'auth_required' });
+      try {
+        if (firebaseUser) {
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            // 💥 防御性修复：先判断是否有 email，没有则默认使用 'Brewer'
+            full_name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Brewer'),
+          });
+          setAuthError(null);
+        } else {
+          setUser(null);
+          setAuthError({ type: 'auth_required' });
+        }
+      } catch (error) {
+        console.error("Auth context processing error:", error);
+      } finally {
+        // 💥 无论发生什么，强制关闭转圈加载动画！
+        setAuthChecked(true);
+        setIsLoadingAuth(false);
       }
-      setAuthChecked(true);
-      setIsLoadingAuth(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  const checkUserAuth = useCallback(async () => {
-    return user;
-  }, [user]);
+  const checkUserAuth = useCallback(async () => user, [user]);
 
   const value = useMemo(() => ({
     user,

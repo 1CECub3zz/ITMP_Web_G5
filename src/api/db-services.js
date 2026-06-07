@@ -24,7 +24,8 @@ export async function submitBrewLog(brewData) {
 
         const docRef = await addDoc(collection(db, "brews"), {
             authorUid: currentUser.uid,
-            authorName: currentUser.displayName || currentUser.email.split('@')[0],
+            // 💥 防御性修复：防止写入数据时 email 为空导致崩溃
+            authorName: currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Brewer'),
             isPublic: true,
             imageUrl: brewData.imageUrl || null,
             basics: { beanName: brewData.beanName, roaster: brewData.roaster },
