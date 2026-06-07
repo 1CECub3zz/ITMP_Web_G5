@@ -20,7 +20,6 @@ export default function Navbar() {
     { label: t('nav.addBrew'), path: '/add-brew' },
     { label: t('nav.records'), path: '/records' },
     { label: t('nav.community'), path: '/community' },
-    { label: t('nav.reviews'), path: '/reviews' },
     { label: `🏆 ${t('nav.badges')}`, path: '/badges' },
   ];
 

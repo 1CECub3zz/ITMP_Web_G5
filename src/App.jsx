@@ -14,7 +14,6 @@ import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import AddBrew from '@/pages/AddBrew';
 import Records from '@/pages/Records';
-import Reviews from '@/pages/Reviews';
 import BrewDetail from '@/pages/BrewDetail';
 import EditBrew from '@/pages/EditBrew';
 import Badges from '@/pages/Badges';
@@ -27,7 +26,7 @@ const AuthenticatedApp = () => {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-brew-cream">
         <div className="text-center">
-          <div className="text-5xl mb-4">â˜•</div>
+          <div className="text-5xl mb-4">â˜?/div>
           <div className="w-8 h-8 border-4 border-brew-green/30 border-t-brew-green rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
@@ -50,7 +49,6 @@ const AuthenticatedApp = () => {
         <Route path="/add-brew" element={<AddBrew />} />
         <Route path="/records" element={<Records />} />
         <Route path="/community" element={<CommunityRecipes />} />
-        <Route path="/reviews" element={<Reviews />} />
         <Route path="/brew/:id" element={<BrewDetail />} />
         <Route path="/edit-brew/:id" element={<EditBrew />} />
         <Route path="/badges" element={<Badges />} />
@@ -74,3 +72,4 @@ function App() {
 }
 
 export default App;
+
