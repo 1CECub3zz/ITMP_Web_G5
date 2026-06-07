@@ -16,6 +16,7 @@ export default function Landing() {
   const { t } = useI18n();
 
   return (
+
     <div className="min-h-screen bg-brew-cream flex flex-col">
       {/* Navbar */}
       <header className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto w-full">

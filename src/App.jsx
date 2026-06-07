@@ -1,6 +1,6 @@
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClientInstance } from '@/lib/query-client'
+import { Toaster } from "@/components/ui/toaster";
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClientInstance } from '@/lib/query-client';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -20,56 +20,55 @@ import Badges from '@/pages/Badges';
 import CommunityRecipes from '@/pages/CommunityRecipes';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
+    const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+    if (isLoadingPublicSettings || isLoadingAuth) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-brew-cream">
+                <div className="text-center">
+                    <div className="text-5xl mb-4">â˜•</div>
+                    <div className="w-8 h-8 border-4 border-brew-green/30 border-t-brew-green rounded-full animate-spin mx-auto"></div>
+                </div>
+            </div>
+        );
+    }
+
+    if (authError?.type === 'user_not_registered') {
+        return <UserNotRegisteredError />;
+    }
+
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-brew-cream">
-        <div className="text-center">
-          <div className="text-5xl mb-4">â˜?/div>
-          <div className="w-8 h-8 border-4 border-brew-green/30 border-t-brew-green rounded-full animate-spin mx-auto"></div>
-        </div>
-      </div>
+        <Routes>
+            <Route path="/welcome" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/welcome" replace />} />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/add-brew" element={<AddBrew />} />
+                <Route path="/records" element={<Records />} />
+                <Route path="/community" element={<CommunityRecipes />} />
+                <Route path="/brew/:id" element={<BrewDetail />} />
+                <Route path="/edit-brew/:id" element={<EditBrew />} />
+                <Route path="/badges" element={<Badges />} />
+            </Route>
+            <Route path="*" element={<PageNotFound />} />
+        </Routes>
     );
-  }
-
-  if (authError?.type === 'user_not_registered') {
-    return <UserNotRegisteredError />;
-  }
-
-  return (
-    <Routes>
-      <Route path="/welcome" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/welcome" replace />} />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/add-brew" element={<AddBrew />} />
-        <Route path="/records" element={<Records />} />
-        <Route path="/community" element={<CommunityRecipes />} />
-        <Route path="/brew/:id" element={<BrewDetail />} />
-        <Route path="/edit-brew/:id" element={<EditBrew />} />
-        <Route path="/badges" element={<Badges />} />
-      </Route>
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
-  );
 };
 
 function App() {
-  return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
-  );
+    return (
+        <AuthProvider>
+            <QueryClientProvider client={queryClientInstance}>
+                <Router>
+                    <AuthenticatedApp />
+                </Router>
+                <Toaster />
+            </QueryClientProvider>
+        </AuthProvider>
+    );
 }
 
 export default App;
-
