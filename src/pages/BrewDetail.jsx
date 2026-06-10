@@ -8,12 +8,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/AuthContext';
 import { getBrewById, getCommentsForBrew, addCommentToBrew } from '@/api/db-services';
 import { format } from 'date-fns';
+import { useI18n } from '@/lib/I18nContext';
 
 export default function BrewDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
     const { toast } = useToast();
+    const { t } = useI18n();
 
     const [brew, setBrew] = useState(null);
     const [comments, setComments] = useState([]);
@@ -89,7 +91,7 @@ export default function BrewDetail() {
             <Navbar />
             <main className="max-w-3xl mx-auto px-4 py-8">
                 <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
-                    <ArrowLeft size={16} /> Back
+                    <ArrowLeft size={16} /> {t('common.back')}
                 </button>
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm mb-8">
@@ -102,14 +104,14 @@ export default function BrewDetail() {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h1 className="font-playfair text-3xl font-bold mb-2">{brew.basics?.beanName}</h1>
-                                <p className="text-muted-foreground">Brewed by {brew.authorName || 'Community Brewer'} • {format(brew.createdAt?.toDate() || new Date(), 'MMM d, yyyy')}</p>
+                                <p className="text-muted-foreground">{t('brewDetail.brewer')}: {brew.authorName || 'Community Brewer'} • {format(brew.createdAt?.toDate() || new Date(), 'MMM d, yyyy')}</p>
                             </div>
                             <StarRating value={brew.review?.rating || 0} readonly size={20} />
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-border my-6">
-                            <div><p className="text-xs text-muted-foreground mb-1">Type</p><p className="font-medium capitalize">{brew.basics?.roaster}</p></div>
-                            <div><p className="text-xs text-muted-foreground mb-1">Method</p><p className="font-medium capitalize">{brew.parameters?.method}</p></div>
+                            <div><p className="text-xs text-muted-foreground mb-1">{t('records.type')}</p><p className="font-medium capitalize">{brew.basics?.roaster ? (t(`types.${brew.basics.roaster}`) !== `types.${brew.basics.roaster}` ? t(`types.${brew.basics.roaster}`) : brew.basics.roaster) : '—'}</p></div>
+                            <div><p className="text-xs text-muted-foreground mb-1">{t('records.method')}</p><p className="font-medium capitalize">{brew.parameters?.method ? (t(`methods.${brew.parameters.method}`) !== `methods.${brew.parameters.method}` ? t(`methods.${brew.parameters.method}`) : brew.parameters.method) : '—'}</p></div>
                             <div><p className="text-xs text-muted-foreground mb-1">Dose</p><p className="font-medium">{brew.parameters?.dose_grams}g</p></div>
                         </div>
 
@@ -129,7 +131,7 @@ export default function BrewDetail() {
                     <div className="space-y-4 mb-8">
                         <AnimatePresence>
                             {comments.length === 0 ? (
-                                <p className="text-muted-foreground text-sm italic">Be the first to share your thoughts!</p>
+                                <p className="text-muted-foreground text-sm italic">{t('brewDetail.noComments')}</p>
                             ) : (
                                 comments.map((comment) => (
                                     <motion.div key={comment.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="bg-card border border-border p-4 rounded-2xl">
@@ -151,16 +153,16 @@ export default function BrewDetail() {
                             type="text"
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
+                            placeholder={t('brewDetail.writeComment')}
+                            className="flex-1 border border-input bg-card rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brew-green"
                             onKeyDown={(e) => e.key === 'Enter' && handleSendComment()}
-                            placeholder="Ask about the recipe, share your thoughts..."
-                            className="flex-1 border border-input bg-card rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brew-green"
                         />
                         <button
                             onClick={handleSendComment}
                             disabled={sending || !newComment.trim()}
-                            className="bg-brew-green text-white px-6 rounded-xl flex items-center justify-center hover:bg-brew-green/90 transition-colors disabled:opacity-50"
+                            className="bg-brew-green text-white px-5 rounded-xl hover:bg-brew-green-light transition-colors disabled:opacity-50"
                         >
-                            {sending ? '...' : <Send size={18} />}
+                            <Send size={20} />
                         </button>
                     </div>
                 </motion.div>

@@ -39,9 +39,9 @@ export default function Dashboard() {
 
         // 映射供勋章系统计算
         const mappedForBadges = myCloudBrews.map(b => ({
-          type: b.basics?.roaster || 'pourover',
-          method: b.parameters?.method || 'V60',
-          rating: b.review?.rating || 0
+          method: b.parameters?.method || '',
+          rating: b.review?.rating || 0,
+          createdAt: b.createdAt || null,
         }));
 
         setStats({

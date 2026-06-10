@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
           setAuthError(null);
         } else {
           setUser(null);
-          setAuthError({ type: 'auth_required' });
+          setAuthError(null); // Not authenticated is a normal state, not an error
         }
       } catch (error) {
         console.error("Auth context processing error:", error);

@@ -23,9 +23,9 @@ export default function BadgesPage() {
       try {
         const cloudBrews = await getMyBrews();
         const mappedBrews = cloudBrews.map(brew => ({
-          type: brew.basics?.roaster || 'pourover',
-          method: brew.parameters?.method || 'V60',
-          rating: brew.review?.rating || 0
+          method: brew.parameters?.method || '',
+          rating: brew.review?.rating || 0,
+          createdAt: brew.createdAt || null,
         }));
 
         if (isMounted) {

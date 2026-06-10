@@ -24,13 +24,22 @@ export async function submitBrewLog(brewData) {
 
         const docRef = await addDoc(collection(db, "brews"), {
             authorUid: currentUser.uid,
-            // 💥 防御性修复：防止写入数据时 email 为空导致崩溃
             authorName: currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Brewer'),
             isPublic: true,
             imageUrl: brewData.imageUrl || null,
             basics: { beanName: brewData.beanName, roaster: brewData.roaster },
-            parameters: { method: brewData.method, dose_grams: Number(brewData.dose_grams) || 0 },
-            review: { rating: Number(brewData.rating) || 0, comment: brewData.comment || "" },
+            parameters: {
+                method: brewData.method,
+                dose_grams: Number(brewData.dose_grams) || 0,
+                pax: Number(brewData.pax) || 1,
+                time: brewData.time || null,
+            },
+            review: {
+                rating: Number(brewData.rating) || 0,
+                comment: brewData.comment || "",
+                flavor: Number(brewData.flavor) || 0,
+                ease: Number(brewData.ease) || 0,
+            },
             metrics: { commentCount: 0 },
             createdAt: serverTimestamp()
         });
@@ -76,7 +85,7 @@ export async function getMyBrews() {
     } catch (error) { return []; }
 }
 
-export async function searchCommunityBrews(keyword = "", methodFilter = "all") {
+export async function searchCommunityBrews(keyword = "", typeFilter = "all") {
     try {
         const q = query(collection(db, "brews"), orderBy("createdAt", "desc"), limit(100));
         const querySnapshot = await getDocs(q);
@@ -84,14 +93,19 @@ export async function searchCommunityBrews(keyword = "", methodFilter = "all") {
         const lower = keyword.toLowerCase().trim();
         return results.filter(b =>
             (lower === "" || b.basics?.beanName?.toLowerCase().includes(lower)) &&
-            (methodFilter === "all" || b.parameters?.method === methodFilter)
+            (typeFilter === "all" || b.basics?.roaster === typeFilter)
         );
     } catch (error) { return []; }
 }
 
 export async function getBrewById(id) {
-    const snap = await getDoc(doc(db, "brews", id));
-    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    try {
+        const snap = await getDoc(doc(db, "brews", id));
+        return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    } catch (error) {
+        console.error("getBrewById failed:", error);
+        return null;
+    }
 }
 
 // ==========================================
@@ -99,7 +113,15 @@ export async function getBrewById(id) {
 // ==========================================
 export async function addCommentToBrew(brewId, text) {
     try {
-        await addDoc(collection(db, "comments"), { brewId, authorUid: auth.currentUser.uid, authorName: auth.currentUser.displayName, text, createdAt: serverTimestamp() });
+        const currentUser = auth.currentUser;
+        if (!currentUser) return { success: false, errorMessage: "Authentication required." };
+        await addDoc(collection(db, "comments"), {
+            brewId,
+            authorUid: currentUser.uid,
+            authorName: currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Brewer'),
+            text,
+            createdAt: serverTimestamp()
+        });
         return { success: true };
     } catch (error) { return { success: false, errorMessage: error.message }; }
 }

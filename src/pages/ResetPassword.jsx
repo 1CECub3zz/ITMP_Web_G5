@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 // 💥 引入真实 API
 import { confirmNewPassword } from '@/api/db-services';
 import RippleButton from '@/components/ui/RippleButton';
+import { Coffee } from 'lucide-react';
 
 export default function ResetPassword() {
   const params = new URLSearchParams(window.location.search);
@@ -34,7 +35,7 @@ export default function ResetPassword() {
       <div className="min-h-screen bg-brew-cream flex items-center justify-center px-4">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md bg-card border border-border rounded-3xl shadow-2xl p-8">
           <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-brew-green flex items-center justify-center mx-auto mb-3 shadow-lg"><span className="text-3xl">☕</span></div>
+            <div className="w-14 h-14 rounded-2xl bg-brew-green flex items-center justify-center mx-auto mb-3 shadow-lg"><Coffee className="text-white" size={32} /></div>
             <h1 className="font-playfair text-3xl font-bold text-brew-green">New Password</h1>
           </div>
           {done ? (

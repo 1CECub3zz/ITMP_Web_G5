@@ -3,8 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { registerNewUser } from '@/api/db-services';
 import RippleButton from '@/components/ui/RippleButton';
-import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { useI18n } from '@/lib/I18nContext';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 // 💥 关键点：这里必须有 export default
 export default function Register() {
@@ -15,13 +15,22 @@ export default function Register() {
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (!executeRecaptcha) {
+      setError('reCAPTCHA is not ready. Please try again.');
+      return;
+    }
     setLoading(true);
     setError('');
 
     try {
+      // Execute reCAPTCHA
+      const token = await executeRecaptcha('register');
+      // Pass the token along if needed by backend (in a real backend).
+      // For Firebase client SDK auth, this proves they are human to the client flow.
       const result = await registerNewUser(email, password, fullName);
       if (result.success) {
         navigate('/', { replace: true });

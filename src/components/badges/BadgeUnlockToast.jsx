@@ -11,7 +11,7 @@ export default function BadgeUnlockToast({ badge, onDone }) {
     confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#2d6a4f', '#40916c', '#d4a373', '#ffd166'] });
     const t = setTimeout(() => { setVisible(false); setTimeout(onDone, 400); }, 3500);
     return () => clearTimeout(t);
-  }, [badge]);
+  }, [badge, onDone]);
 
   return (
     <AnimatePresence>
@@ -28,11 +28,11 @@ export default function BadgeUnlockToast({ badge, onDone }) {
             transition={{ duration: 0.6 }}
             className="text-4xl"
           >
-            {badge.emoji}
+            {badge.icon}
           </motion.span>
           <div>
             <p className="text-xs font-medium opacity-80 uppercase tracking-wide">Badge Unlocked!</p>
-            <p className="font-bold text-lg">{badge.label}</p>
+            <p className="font-bold text-lg">{badge.name}</p>
             <p className="text-xs opacity-75">{badge.description}</p>
           </div>
         </motion.div>

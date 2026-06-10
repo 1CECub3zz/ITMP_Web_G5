@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { loginWithEmail, loginWithGoogleAuth } from '@/api/db-services';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import RippleButton from '@/components/ui/RippleButton';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Coffee } from 'lucide-react';
 import { useI18n } from '@/lib/I18nContext';
 
 export default function Login() {
@@ -47,7 +47,7 @@ export default function Login() {
 
             <div className="text-center mb-8">
               <div className="w-14 h-14 rounded-2xl bg-brew-green flex items-center justify-center mx-auto mb-3 shadow-lg">
-                <span className="text-3xl">☕</span>
+                <Coffee className="text-white" size={32} />
               </div>
               <h1 className="font-playfair text-3xl font-bold text-brew-green">BrewTrack</h1>
               <p className="text-muted-foreground text-sm mt-1">{t('auth.signInTitle')}</p>

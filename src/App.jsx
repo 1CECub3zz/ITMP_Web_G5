@@ -2,6 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+import { Coffee } from 'lucide-react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -25,8 +27,8 @@ const AuthenticatedApp = () => {
     if (isLoadingPublicSettings || isLoadingAuth) {
         return (
             <div className="fixed inset-0 flex items-center justify-center bg-brew-cream">
-                <div className="text-center">
-                    <div className="text-5xl mb-4">☕</div>
+                <div className="text-center text-brew-green">
+                    <Coffee size={48} className="mx-auto mb-4 opacity-50" />
                     <div className="w-8 h-8 border-4 border-brew-green/30 border-t-brew-green rounded-full animate-spin mx-auto"></div>
                 </div>
             </div>
@@ -60,14 +62,16 @@ const AuthenticatedApp = () => {
 
 function App() {
     return (
-        <AuthProvider>
-            <QueryClientProvider client={queryClientInstance}>
-                <Router>
-                    <AuthenticatedApp />
-                </Router>
-                <Toaster />
-            </QueryClientProvider>
-        </AuthProvider>
+        <GoogleReCaptchaProvider reCaptchaKey="6Le9sBctAAAAAGRilAg6Hd_5WdaA90BGAEmpE0QD">
+            <AuthProvider>
+                <QueryClientProvider client={queryClientInstance}>
+                    <Router>
+                        <AuthenticatedApp />
+                    </Router>
+                    <Toaster />
+                </QueryClientProvider>
+            </AuthProvider>
+        </GoogleReCaptchaProvider>
     );
 }
 

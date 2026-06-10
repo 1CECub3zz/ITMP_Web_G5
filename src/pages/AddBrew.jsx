@@ -22,7 +22,8 @@ export default function AddBrew() {
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
-    name: '', type: 'pourover', method: 'V60', ingredients: '', notes: '', rating: 0, image_url: null,
+    name: '', type: 'Coffee', method: 'Pour Over', ingredients: '', notes: '', rating: 0, image_url: null,
+    time: '', pax: 1, flavor: 0, ease: 0
   });
 
   const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
@@ -50,8 +51,10 @@ export default function AddBrew() {
     if (!form.name || form.rating === 0) return toast({ variant: 'destructive', description: "Name and rating required." });
     try {
       setSaving(true);
+      const calculatedDose = (Number(form.ingredients) || 0) * form.pax;
       const result = await submitBrewLog({
-        beanName: form.name, roaster: form.type, method: form.method, dose_grams: form.ingredients, rating: form.rating, comment: form.notes, imageUrl: form.image_url
+        beanName: form.name, roaster: form.type, method: form.method, dose_grams: calculatedDose, rating: form.rating, comment: form.notes, imageUrl: form.image_url,
+        flavor: form.flavor, ease: form.ease, time: form.time, pax: form.pax
       });
       if (result.success) {
         setSuccess(true);
@@ -101,18 +104,44 @@ export default function AddBrew() {
       case 2:
         return (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-2 flex items-center gap-2"><Coffee size={16} /> Base Dose (Grams)</label>
+                  <input type="number" value={form.ingredients} onChange={(e) => updateForm('ingredients', e.target.value)} className="w-full border border-input bg-card rounded-xl px-4 py-3 focus:ring-2 focus:ring-brew-green" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 flex items-center gap-2">Portions (Pax)</label>
+                  <input type="number" min="1" value={form.pax} onChange={(e) => updateForm('pax', Number(e.target.value))} className="w-full border border-input bg-card rounded-xl px-4 py-3 focus:ring-2 focus:ring-brew-green" />
+                </div>
+              </div>
+              <div className="bg-muted/50 p-4 rounded-xl flex items-center justify-between">
+                <span className="text-sm font-medium">Total Dose Required:</span>
+                <span className="font-bold text-brew-green text-lg">{(Number(form.ingredients) || 0) * form.pax}g</span>
+              </div>
               <div>
-                <label className="block text-sm font-semibold mb-2 flex items-center gap-2"><Coffee size={16} /> Dose (Grams)</label>
-                <input type="number" value={form.ingredients} onChange={(e) => updateForm('ingredients', e.target.value)} className="w-full border border-input bg-card rounded-xl px-4 py-3 focus:ring-2 focus:ring-brew-green" />
+                <label className="block text-sm font-semibold mb-2 flex items-center gap-2">Brewing Time (e.g. 03:30)</label>
+                <input type="text" placeholder="MM:SS" value={form.time} onChange={(e) => updateForm('time', e.target.value)} className="w-full border border-input bg-card rounded-xl px-4 py-3 focus:ring-2 focus:ring-brew-green" />
               </div>
             </motion.div>
         );
       case 3:
         return (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-              <div className="text-center mb-6">
-                <h3 className="text-lg font-bold mb-2">Rating</h3>
-                <StarRating value={form.rating} onChange={(val) => updateForm('rating', val)} size={24} />
+              <div className="text-center mb-6 space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold mb-1">Overall Rating</h3>
+                  <StarRating value={form.rating} onChange={(val) => updateForm('rating', val)} size={24} />
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4 bg-muted/20 p-4 rounded-2xl border border-border">
+                  <div>
+                    <h3 className="text-xs font-semibold mb-1 text-muted-foreground">Flavor Profile</h3>
+                    <StarRating value={form.flavor} onChange={(val) => updateForm('flavor', val)} size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-semibold mb-1 text-muted-foreground">Ease of Prep</h3>
+                    <StarRating value={form.ease} onChange={(val) => updateForm('ease', val)} size={18} />
+                  </div>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2">Notes</label>
@@ -145,7 +174,13 @@ export default function AddBrew() {
           <div className="flex-1"><AnimatePresence mode="wait">{renderStep()}</AnimatePresence></div>
           <div className="mt-8 pt-6 border-t border-border flex justify-between gap-4">
             {step > 1 && <button onClick={() => setStep(step - 1)} className="px-6 py-3 border-2 rounded-xl flex items-center"><ChevronLeft size={18} /> Back</button>}
-            <RippleButton className="flex-1 flex items-center justify-center" onClick={() => step < 3 ? setStep(step + 1) : handleSubmit()} disabled={saving || uploadingImage}>
+            <RippleButton className="flex-1 flex items-center justify-center" onClick={() => {
+              if (step === 1 && !form.name.trim()) {
+                toast({ variant: 'destructive', description: 'Please enter a brew name before continuing.' });
+                return;
+              }
+              step < 3 ? setStep(step + 1) : handleSubmit();
+            }} disabled={saving || uploadingImage}>
               {step < 3 ? <>Next <ChevronRight size={18} /></> : (saving ? 'Saving...' : 'Save Brew')}
             </RippleButton>
           </div>

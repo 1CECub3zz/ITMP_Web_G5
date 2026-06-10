@@ -18,14 +18,24 @@ export function getEarnedBadges(brews = []) {
   if (totalBrews >= 1) earned.push('first_brew');
   if (totalBrews >= 10) earned.push('dedicated');
 
-  const pourOvers = brews.filter(b => b.type === 'pourover' || b.method === 'V60');
+  const pourOvers = brews.filter(b => b.method === 'Pour Over' || b.method === 'V60');
   if (pourOvers.length >= 5) earned.push('pourover_master');
 
   const hasFiveStar = brews.some(b => b.rating >= 5);
   if (hasFiveStar) earned.push('top_rated');
 
-  const hasEspresso = brews.some(b => b.type === 'espresso' || b.method === 'Espresso');
+  const hasEspresso = brews.some(b => b.method === 'Espresso');
   if (hasEspresso) earned.push('espresso_lover');
+
+  // night_owl: 检查是否有在晚上8点之后记录的冲煮
+  const hasNightBrew = brews.some(b => {
+    if (!b.createdAt) return false;
+    try {
+      const date = b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+      return date.getHours() >= 20;
+    } catch { return false; }
+  });
+  if (hasNightBrew) earned.push('night_owl');
 
   return earned;
 }

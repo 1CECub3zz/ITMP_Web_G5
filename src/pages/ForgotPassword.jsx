@@ -4,33 +4,46 @@ import { motion } from 'framer-motion';
 // 💥 引入真实 API
 import { sendResetEmail } from '@/api/db-services';
 import RippleButton from '@/components/ui/RippleButton';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { Coffee } from 'lucide-react';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!executeRecaptcha) {
+      setError('reCAPTCHA is not ready. Please try again.');
+      return;
+    }
     setLoading(true);
     setError('');
 
-    // 💥 调用真实的 Firebase 邮件发送引擎
-    const result = await sendResetEmail(email);
+    try {
+      const token = await executeRecaptcha('forgot_password');
+      // 💥 调用真实的 Firebase 邮件发送引擎
+      const result = await sendResetEmail(email);
     if (result.success) {
       setSent(true);
-    } else {
-      setError(result.errorMessage);
+      } else {
+        setError(result.errorMessage);
+      }
+    } catch (err) {
+      setError('Failed to send reset email.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
       <div className="min-h-screen bg-brew-cream flex items-center justify-center px-4">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md bg-card border border-border rounded-3xl shadow-2xl p-8">
           <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-brew-green flex items-center justify-center mx-auto mb-3 shadow-lg"><span className="text-3xl">☕</span></div>
+            <div className="w-14 h-14 rounded-2xl bg-brew-green flex items-center justify-center mx-auto mb-3 shadow-lg"><Coffee className="text-white" size={32} /></div>
             <h1 className="font-playfair text-3xl font-bold text-brew-green">Reset Password</h1>
           </div>
           {sent ? (

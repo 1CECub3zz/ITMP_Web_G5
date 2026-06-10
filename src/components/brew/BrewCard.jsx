@@ -3,26 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Heart } from 'lucide-react';
 import StarRating from '@/components/ui/StarRating';
-import { apiClient } from '@/api/localClient';
-
-const placeholderImages = {
-  Coffee: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80',
-  Tea: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80',
-  Matcha: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=400&q=80',
-  Juice: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80',
-  Other: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80',
-};
+import { updateBrewLog } from '@/api/db-services';
+import { BREW_PLACEHOLDER_IMAGES } from '@/lib/brewMeta';
 
 export default function BrewCard({ brew, onUpdate }) {
   const navigate = useNavigate();
 
   const toggleFavourite = async (e) => {
     e.stopPropagation();
-    await apiClient.entities.Brew.update(brew.id, { is_favourite: !brew.is_favourite });
-    if (onUpdate) onUpdate();
+    try {
+      await updateBrewLog(brew.id, { is_favourite: !brew.is_favourite });
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error('Failed to toggle favourite:', error);
+    }
   };
 
-  const img = brew.image_url || placeholderImages[brew.type] || placeholderImages.Other;
+  const img = brew.image_url || BREW_PLACEHOLDER_IMAGES[brew.type] || BREW_PLACEHOLDER_IMAGES.Other;
 
   return (
     <motion.div
@@ -37,7 +34,7 @@ export default function BrewCard({ brew, onUpdate }) {
           src={img}
           alt={brew.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={(e) => { e.target.src = placeholderImages.Other; }}
+          onError={(e) => { e.target.src = BREW_PLACEHOLDER_IMAGES.Other; }}
         />
         <motion.button
           whileTap={{ scale: 1.4 }}

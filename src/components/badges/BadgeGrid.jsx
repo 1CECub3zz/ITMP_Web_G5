@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check, Award } from 'lucide-react';
 
 export default function BadgeGrid({ badges = [], earnedIds = [] }) {
 
@@ -7,7 +7,7 @@ export default function BadgeGrid({ badges = [], earnedIds = [] }) {
   if (!badges || !Array.isArray(badges) || badges.length === 0) {
     return (
         <div className="py-12 text-center text-muted-foreground border-2 border-dashed border-border rounded-2xl">
-          <span className="text-3xl block mb-2">🏆</span>
+          <Award size={32} className="mx-auto mb-2 opacity-50 text-brew-gold" />
           Loading achievement data...
         </div>
     );

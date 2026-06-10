@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Home, PlusCircle, BookOpen, Star } from 'lucide-react';
+import { ArrowRight, Home, PlusCircle, BookOpen, Star, Coffee } from 'lucide-react';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import RippleButton from '@/components/ui/RippleButton';
 import { useI18n } from '@/lib/I18nContext';
 
 const menuItems = [
-  { icon: Home, key: 'nav.dashboard' },
-  { icon: PlusCircle, key: 'nav.addBrew' },
-  { icon: BookOpen, key: 'nav.records' },
-  { icon: Star, key: 'nav.reviews' },
+  { icon: Home, key: 'nav.dashboard', path: '/' },
+  { icon: PlusCircle, key: 'nav.addBrew', path: '/add-brew' },
+  { icon: BookOpen, key: 'nav.records', path: '/records' },
+  { icon: Star, key: 'nav.reviews', path: '/reviews' },
 ];
 
 export default function Landing() {
@@ -22,7 +22,7 @@ export default function Landing() {
       <header className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-full bg-brew-green flex items-center justify-center">
-            <span className="text-white">☕</span>
+            <Coffee className="text-white" size={20} />
           </div>
           <span className="font-playfair font-bold text-xl text-brew-green">BrewTrack</span>
         </div>
@@ -75,18 +75,19 @@ export default function Landing() {
         >
           <div className="bg-brew-green rounded-3xl p-6 shadow-2xl w-56">
             {menuItems.map((item, i) => (
-              <motion.div
-                key={item.key}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 + i * 0.1 }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-colors ${
-                  i === 0 ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10'
-                }`}
-              >
-                <item.icon size={20} />
-                <span className="font-medium">{t(item.key)}</span>
-              </motion.div>
+              <Link to={item.path || '/login'} key={item.key}>
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + i * 0.1 }}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-colors ${
+                    i === 0 ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10'
+                  }`}
+                >
+                  <item.icon size={20} />
+                  <span className="font-medium">{t(item.key)}</span>
+                </motion.div>
+              </Link>
             ))}
           </div>
         </motion.div>
