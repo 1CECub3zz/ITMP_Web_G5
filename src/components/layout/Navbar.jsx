@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, User, Coffee, Trophy } from 'lucide-react';
+import { Menu, X, LogOut, User, Coffee, Trophy, Package, BookOpen } from 'lucide-react';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { useI18n } from '@/lib/I18nContext';
 import { useAuth } from '@/lib/AuthContext';
@@ -32,6 +32,8 @@ export default function Navbar() {
     { label: t('nav.dashboard'), path: '/' },
     { label: t('nav.addBrew'), path: '/add-brew' },
     { label: t('nav.records'), path: '/records' },
+    { label: 'Profiles', path: '/profiles', icon: BookOpen },
+    { label: 'Inventory', path: '/inventory', icon: Package },
     { label: t('nav.community'), path: '/community' },
     { label: t('nav.badges'), path: '/badges', icon: Trophy },
   ];

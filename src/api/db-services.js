@@ -1,7 +1,7 @@
 import { db, auth } from './firebase-config';
 import {
     collection, addDoc, serverTimestamp, getDocs, query, where,
-    orderBy, limit, doc, getDoc, deleteDoc, updateDoc
+    orderBy, limit, doc, getDoc, deleteDoc, updateDoc, increment
 } from "firebase/firestore";
 import {
     createUserWithEmailAndPassword,
@@ -33,6 +33,21 @@ export async function submitBrewLog(brewData) {
                 dose_grams: Number(brewData.dose_grams) || 0,
                 pax: Number(brewData.pax) || 1,
                 time: brewData.time || null,
+                // New production fields
+                waterTemp: Number(brewData.waterTemp) || null,
+                waterVolumeLiters: Number(brewData.waterVolumeLiters) || null,
+                contactTimeSecs: Number(brewData.contactTimeSecs) || null,
+                tds: Number(brewData.tds) || null,
+                yieldVolumeMl: Number(brewData.yieldVolumeMl) || null,
+            },
+            production: {
+                lotId: brewData.lotId || null,
+                lotName: brewData.lotName || null,
+                actualWeightGrams: Number(brewData.actualWeightGrams) || null,
+                masterProfileId: brewData.masterProfileId || null,
+                masterProfileName: brewData.masterProfileName || null,
+                tastePassed: brewData.tastePassed ?? null,
+                sensoryNotes: brewData.sensoryNotes || "",
             },
             review: {
                 rating: Number(brewData.rating) || 0,
@@ -43,6 +58,12 @@ export async function submitBrewLog(brewData) {
             metrics: { commentCount: 0 },
             createdAt: serverTimestamp()
         });
+
+        // Auto-deduct from inventory lot if one was selected
+        if (brewData.lotId && brewData.actualWeightGrams) {
+            await deductFromLot(brewData.lotId, Number(brewData.actualWeightGrams));
+        }
+
         return { success: true, id: docRef.id };
     } catch (error) { return { success: false, errorMessage: error.message }; }
 }
@@ -177,4 +198,118 @@ export async function sendResetEmail(email) {
 export async function confirmNewPassword(token, password) {
     try { await confirmPasswordReset(auth, token, password); return { success: true }; }
     catch (e) { return { success: false, errorMessage: e.message }; }
+}
+
+// ==========================================
+// 5. Master Profiles (Recipe Target Specs)
+// ==========================================
+export async function createMasterProfile(profileData) {
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return { success: false, errorMessage: "Authentication required." };
+        const docRef = await addDoc(collection(db, "masterProfiles"), {
+            authorUid: currentUser.uid,
+            name: profileData.name,
+            beverageType: profileData.beverageType || 'Coffee',
+            method: profileData.method || 'Pour Over',
+            targetDoseGrams: Number(profileData.targetDoseGrams) || 0,
+            targetWaterTempC: Number(profileData.targetWaterTempC) || 0,
+            targetSteepTimeSecs: Number(profileData.targetSteepTimeSecs) || 0,
+            targetTdsMin: Number(profileData.targetTdsMin) || 0,
+            targetTdsMax: Number(profileData.targetTdsMax) || 0,
+            targetYieldMl: Number(profileData.targetYieldMl) || 0,
+            notes: profileData.notes || "",
+            createdAt: serverTimestamp(),
+        });
+        return { success: true, id: docRef.id };
+    } catch (error) { return { success: false, errorMessage: error.message }; }
+}
+
+export async function getMasterProfiles() {
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return [];
+        const q = query(collection(db, "masterProfiles"), where("authorUid", "==", currentUser.uid), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (error) { return []; }
+}
+
+export async function updateMasterProfile(profileId, updateData) {
+    try {
+        await updateDoc(doc(db, "masterProfiles", profileId), updateData);
+        return { success: true };
+    } catch (error) { return { success: false, errorMessage: error.message }; }
+}
+
+export async function deleteMasterProfile(profileId) {
+    try {
+        await deleteDoc(doc(db, "masterProfiles", profileId));
+        return { success: true };
+    } catch (error) { return { success: false, errorMessage: error.message }; }
+}
+
+// ==========================================
+// 6. Inventory / MRP (Raw Material Lots)
+// ==========================================
+export async function addInventoryLot(lotData) {
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return { success: false, errorMessage: "Authentication required." };
+        const docRef = await addDoc(collection(db, "inventory"), {
+            authorUid: currentUser.uid,
+            materialName: lotData.materialName,
+            materialType: lotData.materialType || 'Coffee',
+            lotNumber: lotData.lotNumber || "",
+            supplier: lotData.supplier || "",
+            receivedDate: lotData.receivedDate || null,
+            expiryDate: lotData.expiryDate || null,
+            initialWeightGrams: Number(lotData.initialWeightGrams) || 0,
+            totalDeductedGrams: 0,
+            lowStockThresholdGrams: Number(lotData.lowStockThresholdGrams) || 200,
+            notes: lotData.notes || "",
+            createdAt: serverTimestamp(),
+        });
+        return { success: true, id: docRef.id };
+    } catch (error) { return { success: false, errorMessage: error.message }; }
+}
+
+export async function getInventoryLots() {
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return [];
+        const q = query(collection(db, "inventory"), where("authorUid", "==", currentUser.uid), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        return snap.docs.map(d => {
+            const data = d.data();
+            return {
+                id: d.id,
+                ...data,
+                currentStockGrams: (data.initialWeightGrams || 0) - (data.totalDeductedGrams || 0),
+            };
+        });
+    } catch (error) { return []; }
+}
+
+export async function updateInventoryLot(lotId, updateData) {
+    try {
+        await updateDoc(doc(db, "inventory", lotId), updateData);
+        return { success: true };
+    } catch (error) { return { success: false, errorMessage: error.message }; }
+}
+
+export async function deductFromLot(lotId, amountGrams) {
+    try {
+        await updateDoc(doc(db, "inventory", lotId), {
+            totalDeductedGrams: increment(Number(amountGrams) || 0)
+        });
+        return { success: true };
+    } catch (error) { return { success: false, errorMessage: error.message }; }
+}
+
+export async function deleteInventoryLot(lotId) {
+    try {
+        await deleteDoc(doc(db, "inventory", lotId));
+        return { success: true };
+    } catch (error) { return { success: false, errorMessage: error.message }; }
 }

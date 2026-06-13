@@ -20,6 +20,8 @@ import BrewDetail from '@/pages/BrewDetail';
 import EditBrew from '@/pages/EditBrew';
 import Badges from '@/pages/Badges';
 import CommunityRecipes from '@/pages/CommunityRecipes';
+import MasterProfiles from '@/pages/MasterProfiles';
+import Inventory from '@/pages/Inventory';
 
 const AuthenticatedApp = () => {
     const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
@@ -54,6 +56,8 @@ const AuthenticatedApp = () => {
                 <Route path="/brew/:id" element={<BrewDetail />} />
                 <Route path="/edit-brew/:id" element={<EditBrew />} />
                 <Route path="/badges" element={<Badges />} />
+                <Route path="/profiles" element={<MasterProfiles />} />
+                <Route path="/inventory" element={<Inventory />} />
             </Route>
             <Route path="*" element={<PageNotFound />} />
         </Routes>
