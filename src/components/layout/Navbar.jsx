@@ -32,8 +32,8 @@ export default function Navbar() {
     { label: t('nav.dashboard'), path: '/' },
     { label: t('nav.addBrew'), path: '/add-brew' },
     { label: t('nav.records'), path: '/records' },
-    { label: 'Profiles', path: '/profiles', icon: BookOpen },
-    { label: 'Inventory', path: '/inventory', icon: Package },
+    { label: t('nav.profiles'), path: '/profiles', icon: BookOpen },
+    { label: t('nav.inventory'), path: '/inventory', icon: Package },
     { label: t('nav.community'), path: '/community' },
     { label: t('nav.badges'), path: '/badges', icon: Trophy },
   ];

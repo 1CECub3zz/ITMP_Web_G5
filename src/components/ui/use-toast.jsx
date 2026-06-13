@@ -1,5 +1,5 @@
 // Inspired by react-hot-toast library
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const TOAST_LIMIT = 20;
 const TOAST_REMOVE_DELAY = 300; // animation-out time after dismiss

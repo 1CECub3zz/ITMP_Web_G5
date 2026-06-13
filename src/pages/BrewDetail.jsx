@@ -34,7 +34,7 @@ export default function BrewDetail() {
                 ]);
                 if (!isMounted) return;
                 if (!brewData) {
-                    toast({ variant: 'destructive', description: "Brew not found." });
+                    toast({ variant: 'destructive', description: t('brewDetail.brewNotFound') });
                     navigate('/community');
                     return;
                 }
@@ -64,7 +64,7 @@ export default function BrewDetail() {
                 };
                 setComments(prev => [...prev, optimisticComment]);
                 setNewComment("");
-                toast({ description: "💬 Comment posted!" });
+                toast({ description: t('brewDetail.commentPosted') });
             } else {
                 throw new Error(result.errorMessage);
             }
@@ -80,7 +80,7 @@ export default function BrewDetail() {
             <div className="min-h-screen bg-background">
                 <Navbar />
                 <div className="flex justify-center items-center h-[60vh] animate-pulse font-playfair text-xl">
-                    Brewing details...
+                    {t('brewDetail.brewingDetails')}
                 </div>
             </div>
         );
@@ -112,7 +112,7 @@ export default function BrewDetail() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-border my-6">
                             <div><p className="text-xs text-muted-foreground mb-1">{t('records.type')}</p><p className="font-medium capitalize">{brew.basics?.roaster ? (t(`types.${brew.basics.roaster}`) !== `types.${brew.basics.roaster}` ? t(`types.${brew.basics.roaster}`) : brew.basics.roaster) : '—'}</p></div>
                             <div><p className="text-xs text-muted-foreground mb-1">{t('records.method')}</p><p className="font-medium capitalize">{brew.parameters?.method ? (t(`methods.${brew.parameters.method}`) !== `methods.${brew.parameters.method}` ? t(`methods.${brew.parameters.method}`) : brew.parameters.method) : '—'}</p></div>
-                            <div><p className="text-xs text-muted-foreground mb-1">Dose</p><p className="font-medium">{brew.parameters?.dose_grams}g</p></div>
+                            <div><p className="text-xs text-muted-foreground mb-1">{t('brewDetail.dose')}</p><p className="font-medium">{brew.parameters?.dose_grams}g</p></div>
                         </div>
 
                         {brew.review?.comment && (
@@ -125,7 +125,7 @@ export default function BrewDetail() {
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                     <h3 className="font-playfair text-2xl font-bold mb-6 flex items-center gap-2">
-                        <MessageSquare size={24} /> Discussion ({comments.length})
+                        <MessageSquare size={24} /> {t('brewDetail.discussion')} ({comments.length})
                     </h3>
 
                     <div className="space-y-4 mb-8">
