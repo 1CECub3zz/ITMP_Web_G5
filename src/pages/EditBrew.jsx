@@ -90,13 +90,13 @@ export default function EditBrew() {
   };
 
   if (!form) return (
-      <div className="min-h-screen bg-background"><Navbar />
+      <div className="min-h-screen bg-page-main"><Navbar />
         <div className="flex items-center justify-center py-32"><div className="w-8 h-8 border-4 border-brew-green/30 border-t-brew-green rounded-full animate-spin" /></div>
       </div>
   );
 
   return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-page-main">
         <Navbar />
         <main className="max-w-2xl mx-auto px-4 py-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

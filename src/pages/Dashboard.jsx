@@ -68,7 +68,7 @@ export default function Dashboard() {
   ];
 
   return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-page-main">
         <Navbar />
         <main className="max-w-6xl mx-auto px-4 py-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">

@@ -45,7 +45,7 @@ export default function BadgesPage() {
 
   return (
       // 💥 修复 1：将页面设置为 flex 垂直布局，确保 Navbar 永远吸顶
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-page-main flex flex-col">
 
         {/* 💥 修复 2：注入全局导航中枢！彻底打破“孤岛”，恢复丝滑切换 */}
         <Navbar />

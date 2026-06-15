@@ -64,6 +64,26 @@
 @layer utilities {
   .font-playfair { font-family: 'Playfair Display', serif; }
   .font-inter { font-family: 'Inter', sans-serif; }
+
+  /* ── Particle Canvas Layering ── */
+  .content-layer {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Semi-transparent page backgrounds for particle visibility */
+  .bg-page-light {
+    background-color: hsla(var(--brew-cream), 0.82);
+  }
+  .bg-page-main {
+    background-color: hsla(var(--background), 0.82);
+  }
+
+  /* Glassmorphism card style for readability over particles */
+  .glass-card {
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  }
   
   /* Masonry Grid Styles */
   .my-masonry-grid {

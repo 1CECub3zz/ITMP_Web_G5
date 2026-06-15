@@ -17,7 +17,7 @@ export default function Landing() {
 
   return (
 
-    <div className="min-h-screen bg-brew-cream flex flex-col">
+    <div className="min-h-screen bg-page-light flex flex-col">
       {/* Navbar */}
       <header className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-2">

@@ -39,8 +39,7 @@ export default function CommunityRecipes() {
           : await searchCommunityBrews(search, typeFilter);
 
         if (!isMounted) return;
-        const othersBrews = fetchedBrews.filter(b => b.authorUid !== user?.uid);
-        setBrews(mapBackendToFrontend(othersBrews));
+        setBrews(mapBackendToFrontend(fetchedBrews));
       } catch (error) { console.error(error); } finally { if (isMounted) setLoading(false); }
     };
 
@@ -52,7 +51,7 @@ export default function CommunityRecipes() {
   const paginatedBrews = brews.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-page-main">
       <Navbar />
       <main className="max-w-6xl mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -93,14 +92,10 @@ export default function CommunityRecipes() {
                   onClick={() => navigate(`/brew/${brew.id}`)}
                   className="bg-card rounded-3xl overflow-hidden border border-border shadow-sm hover:shadow-xl transition-all cursor-pointer group"
                 >
-                  {brew.image_url ? (
+                  {brew.image_url && (
                     <div className="aspect-[4/5] w-full overflow-hidden bg-muted relative">
                       <img src={brew.image_url} alt={brew.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-                  ) : (
-                    <div className="aspect-[4/5] w-full bg-brew-green/10 flex items-center justify-center relative overflow-hidden">
-                      <Coffee size={64} className="text-brew-green/20" />
                     </div>
                   )}
                   <div className="p-5">

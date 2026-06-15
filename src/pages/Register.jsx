@@ -45,7 +45,7 @@ export default function Register() {
   };
 
   return (
-      <div className="min-h-screen bg-brew-cream flex items-center justify-center px-4">
+      <div className="min-h-screen bg-page-light flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-3xl shadow-2xl p-8">
             <div className="text-center mb-8">

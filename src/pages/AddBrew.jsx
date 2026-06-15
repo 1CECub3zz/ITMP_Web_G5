@@ -29,8 +29,8 @@ function calcDilutionWater(yieldMl, targetTdsMax, tds) {
 }
 
 // ---------- big input classnames ----------
-const BIG_INPUT = "w-full bg-muted/40 border border-border rounded-2xl px-5 py-5 text-xl font-medium focus:outline-none focus:ring-2 focus:ring-brew-green focus:bg-card transition-all placeholder:text-muted-foreground/50";
-const BIG_SELECT = "w-full bg-muted/40 border border-border rounded-2xl px-5 py-5 text-xl font-medium focus:outline-none focus:ring-2 focus:ring-brew-green focus:bg-card transition-all appearance-none cursor-pointer";
+const BIG_INPUT = "w-full bg-card border border-border rounded-2xl px-5 py-5 text-xl font-medium focus:outline-none focus:ring-2 focus:ring-brew-green transition-all placeholder:text-muted-foreground/50";
+const BIG_SELECT = "w-full bg-card border border-border rounded-2xl px-5 py-5 text-xl font-medium focus:outline-none focus:ring-2 focus:ring-brew-green transition-all appearance-none cursor-pointer";
 const LABEL = "block text-sm font-bold text-muted-foreground mb-2 uppercase tracking-wider";
 
 export default function AddBrew() {
@@ -581,7 +581,7 @@ export default function AddBrew() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-brew-cream flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-page-light flex flex-col items-center justify-center p-6 text-center">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring' }}>
           <div className="w-28 h-28 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 mx-auto">
             <Check size={56} />
@@ -594,7 +594,7 @@ export default function AddBrew() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-page-main flex flex-col">
       <Navbar />
       <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-8 flex flex-col">
         <div className="flex items-center mb-6 relative">

@@ -74,7 +74,7 @@ function ProfileModal({ profile, onClose, onSave, t }) {
     setSaving(false);
   };
 
-  const inputCls = "w-full bg-muted/40 border border-border rounded-xl px-4 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-brew-green focus:bg-card transition-all";
+  const inputCls = "w-full bg-card border border-border rounded-xl px-4 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-brew-green transition-all";
   const labelCls = "block text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide";
 
   return (
@@ -213,7 +213,7 @@ export default function MasterProfiles() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-page-main">
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

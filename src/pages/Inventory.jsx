@@ -197,7 +197,7 @@ export default function Inventory() {
   const totalKg = lots.reduce((a, l) => a + (l.currentStockGrams || 0), 0) / 1000;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-page-main">
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

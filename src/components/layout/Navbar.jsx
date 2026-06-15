@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, User, Coffee, Trophy, Package, BookOpen } from 'lucide-react';
+import { Menu, X, LogOut, User, Coffee, Trophy, Package, BookOpen, LayoutDashboard, PlusCircle, ClipboardList, Users } from 'lucide-react';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { useI18n } from '@/lib/I18nContext';
 import { useAuth } from '@/lib/AuthContext';
@@ -29,12 +29,12 @@ export default function Navbar() {
   }, [profileOpen]);
 
   const navLinks = [
-    { label: t('nav.dashboard'), path: '/' },
-    { label: t('nav.addBrew'), path: '/add-brew' },
-    { label: t('nav.records'), path: '/records' },
+    { label: t('nav.dashboard'), path: '/', icon: LayoutDashboard },
+    { label: t('nav.addBrew'), path: '/add-brew', icon: PlusCircle },
+    { label: t('nav.records'), path: '/records', icon: ClipboardList },
     { label: t('nav.profiles'), path: '/profiles', icon: BookOpen },
     { label: t('nav.inventory'), path: '/inventory', icon: Package },
-    { label: t('nav.community'), path: '/community' },
+    { label: t('nav.community'), path: '/community', icon: Users },
     { label: t('nav.badges'), path: '/badges', icon: Trophy },
   ];
 

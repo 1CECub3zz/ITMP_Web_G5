@@ -77,7 +77,7 @@ export default function BrewDetail() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background">
+            <div className="min-h-screen bg-page-main">
                 <Navbar />
                 <div className="flex justify-center items-center h-[60vh] animate-pulse font-playfair text-xl">
                     {t('brewDetail.brewingDetails')}
@@ -87,7 +87,7 @@ export default function BrewDetail() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-page-main">
             <Navbar />
             <main className="max-w-3xl mx-auto px-4 py-8">
                 <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">

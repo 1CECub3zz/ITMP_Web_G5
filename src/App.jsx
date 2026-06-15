@@ -6,6 +6,7 @@ import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { Coffee } from 'lucide-react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import ParticleCanvas from '@/components/ParticleCanvas';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Landing from '@/pages/Landing';
@@ -70,7 +71,10 @@ function App() {
             <AuthProvider>
                 <QueryClientProvider client={queryClientInstance}>
                     <Router>
-                        <AuthenticatedApp />
+                        <ParticleCanvas />
+                        <div className="content-layer min-h-screen">
+                            <AuthenticatedApp />
+                        </div>
                     </Router>
                     <Toaster />
                 </QueryClientProvider>

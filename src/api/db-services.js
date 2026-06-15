@@ -232,7 +232,10 @@ export async function getMasterProfiles() {
         const q = query(collection(db, "masterProfiles"), where("authorUid", "==", currentUser.uid), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
         return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (error) { return []; }
+    } catch (error) {
+        console.error("❌ getMasterProfiles failed:", error.message, "\n💡 If the error mentions an index, click the link in the browser console to create it in Firebase.");
+        return [];
+    }
 }
 
 export async function updateMasterProfile(profileId, updateData) {
