@@ -1,4 +1,4 @@
-// 1. 确保正确导出 BADGES 数组
+// 1. Ensure BADGES array is exported correctly
 export const BADGES = [
   { id: 'first_brew', name: 'First Drop', icon: '💧', description: 'Log your first coffee brew.' },
   { id: 'pourover_master', name: 'Pour Over Pro', icon: '☕', description: 'Log 5 pour over recipes.' },
@@ -8,7 +8,7 @@ export const BADGES = [
   { id: 'dedicated', name: 'Dedicated Brewer', icon: '🔥', description: 'Log 10 total brews.' }
 ];
 
-// 2. 确保正确导出逻辑计算函数
+// 2. Ensure logical calculation function is exported correctly
 export function getEarnedBadges(brews = []) {
   const earned = [];
   if (!brews || brews.length === 0) return earned;
@@ -27,7 +27,7 @@ export function getEarnedBadges(brews = []) {
   const hasEspresso = brews.some(b => b.method === 'Espresso');
   if (hasEspresso) earned.push('espresso_lover');
 
-  // night_owl: 检查是否有在晚上8点之后记录的冲煮
+  // night_owl: Check if there are brews logged after 8 PM
   const hasNightBrew = brews.some(b => {
     if (!b.createdAt) return false;
     try {

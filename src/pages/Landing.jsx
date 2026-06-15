@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Home, PlusCircle, BookOpen, Star, Coffee } from 'lucide-react';
+import { ArrowRight, Home, PlusCircle, BookOpen, Star, Coffee, Sun, Moon } from 'lucide-react';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import RippleButton from '@/components/ui/RippleButton';
 import { useI18n } from '@/lib/I18nContext';
+import { useTheme } from '@/lib/ThemeContext';
 
 const menuItems = [
   { icon: Home, key: 'nav.dashboard', path: '/' },
@@ -14,6 +15,7 @@ const menuItems = [
 
 export default function Landing() {
   const { t } = useI18n();
+  const { isDark, toggleTheme } = useTheme();
 
   return (
 
@@ -28,6 +30,13 @@ export default function Landing() {
         </div>
         <div className="flex items-center gap-3">
           <LanguageSwitcher compact />
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
+            aria-label="Toggle theme"
+          >
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Link to="/login">
             <motion.button
               whileHover={{ scale: 1.05 }}

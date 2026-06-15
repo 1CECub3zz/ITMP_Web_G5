@@ -15,7 +15,7 @@ import {
 } from "firebase/auth";
 
 // ==========================================
-// 1. 冲煮记录模块 (Brew Logs)
+// 1. Brew Logs Module
 // ==========================================
 export async function submitBrewLog(brewData) {
     try {
@@ -85,7 +85,7 @@ export async function deleteBrewLog(brewId) {
 }
 
 // ==========================================
-// 2. 数据获取与搜索 (Queries)
+// 2. Data Fetching & Queries
 // ==========================================
 export async function getTopRatedBrews() {
     try {
@@ -130,7 +130,7 @@ export async function getBrewById(id) {
 }
 
 // ==========================================
-// 3. 评论与图床 (Comments & Media)
+// 3. Comments & Media Upload
 // ==========================================
 export async function addCommentToBrew(brewId, text) {
     try {
@@ -164,7 +164,7 @@ export async function uploadBrewImage(file) {
 }
 
 // ==========================================
-// 4. Auth 认证模块
+// 4. Authentication Module
 // ==========================================
 export async function registerNewUser(email, password, fullName) {
     try {

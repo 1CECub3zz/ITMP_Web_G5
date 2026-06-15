@@ -1,216 +1,297 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { useTheme } from '@/lib/ThemeContext';
 
 // ╔══════════════════════════════════════════════════════════════════════╗
-// ║  🎛️  AntiGravity-Style Particle System                             ║
-// ║  鼠标静止时粒子围绕鼠标动态旋转 + 排斥 + 非线性弹性回弹              ║
+// ║  AntiGravity-Style Particle System                                 ║
+// ║  • Idle: particles rest in a neat grid                             ║
+// ║  • Mouse moves: particles scatter outward from cursor              ║
+// ║  • Mouse stops: particles gently spring back to grid               ║
+// ╠══════════════════════════════════════════════════════════════════════╣
+// ║                     PARAMETER TUNING GUIDE                         ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 
-// ── 粒子网格 Grid Settings ──────────────────────────────────────────
-const GRID_SPACING = 35;
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │ GRID_SPACING                                                        │
+// │ Distance between particles (px). Smaller value → denser particles;  │
+// │ Larger value → sparser particles.                                   │
+// │ Recommended range: 25 (very dense) ~ 50 (very sparse)               │
+// └─────────────────────────────────────────────────────────────────────┘
+const GRID_SPACING = 40;
 
-// ── 粒子外观 Particle Appearance ────────────────────────────────────
-const DASH_LENGTH_MIN = 1;
-const DASH_LENGTH_MAX = 1;
-const DASH_WIDTH = 3;
-const PARTICLE_OPACITY = 0.55;
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │ DASH_LEN                                                            │
+// │ Length of each confetti dash (px). Larger value → longer lines      │
+// │ Recommended range: 3 (tiny dot) ~ 10 (long dash)                    │
+// │                                                                     │
+// │ DASH_WIDTH                                                          │
+// │ Line thickness (px). Larger value → thicker lines                   │
+// │ Recommended range: 1.0 (thin) ~ 3.0 (thick)                         │
+// │                                                                     │
+// │ BASE_ALPHA                                                          │
+// │ Base transparency.                                                  │
+// │ 0 = fully transparent, 1 = fully opaque                             │
+// │ Recommended range: 0.3 (subtle) ~ 0.8 (vivid)                       │
+// └─────────────────────────────────────────────────────────────────────┘
+const DASH_LEN = 10;
+const DASH_WIDTH = 3.3;
+const BASE_ALPHA = 0.35;
 
-// ── 鼠标排斥 Mouse Repulsion ────────────────────────────────────────
-const MOUSE_RADIUS = 500;
-const REPEL_STRENGTH = 1.0;
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │ REPEL_RADIUS                                                        │
+// │ Radius of particles pushed away by mouse movement (px).             │
+// │ Larger value → affects more particles;                              │
+// │ Smaller value → only affects nearby particles.                      │
+// │ Recommended range: 100 (small ripple) ~ 500 (massive wave)          │
+// │                                                                     │
+// │ REPEL_STRENGTH                                                      │
+// │ Push force. Larger value → particles pushed further away.           │
+// │ Recommended range: 3 (gentle) ~ 20 (explosive)                      │
+// │                                                                     │
+// │ REPEL_FALLOFF                                                       │
+// │ Force decay rate relative to distance. 1=linear, 2=quadratic,       │
+// │ 3=cubic. Larger value → strong near center but weak at edges.       │
+// │ Smaller value → more uniform force across the radius.               │
+// │ Recommended range: 1 (uniform push) ~ 3 (focused burst)             │
+// └─────────────────────────────────────────────────────────────────────┘
+const REPEL_RADIUS = 300;
+const REPEL_STRENGTH = 10;
+const REPEL_FALLOFF = 3;
 
-// ── 鼠标静止时的轨道旋转 Idle Orbit ─────────────────────────────────
-// 当鼠标停下来时，附近粒子会持续围绕鼠标做圆形旋转
-const IDLE_ORBIT_SPEED = 0.012;      // 旋转速度，推荐 0.005~0.03
-const IDLE_ORBIT_RADIUS = 350;       // 轨道影响范围 (px)
-const IDLE_THRESHOLD_MS = 80;        // 鼠标静止多久后开始旋转 (ms)
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │ SPRING                                                              │
+// │ Speed at which particles return to grid. Larger value → faster.     │
+// │ Recommended range: 0.005 (very slow/floaty) ~ 0.08 (snappy)         │
+// │                                                                     │
+// │ DAMPING                                                             │
+// │ Velocity decay. Closer to 1 → particles slide further (high inertia)│
+// │ Closer to 0 → particles stop immediately (low inertia).             │
+// │ Recommended range: 0.80 (heavy/quick stop) ~ 0.96 (ice-like sliding)│
+// └─────────────────────────────────────────────────────────────────────┘
+const SPRING = 0.009;
+const DAMPING = 0.92;
 
-// ── 弹性回弹 Spring Physics ─────────────────────────────────────────
-const SPRING_STIFFNESS = 0.1;
-const SPRING_DAMPING = 0.8;
+// ┌─────────────────────────────────────────────────────────────────────┐
+// │                        COLOR PALETTES                               │
+// │ Repeating a color increases its probability of appearing (weight).  │
+// │ To switch palettes, comment out current COLORS, uncomment another.  │
+// └─────────────────────────────────────────────────────────────────────┘
 
-// ── 颜色 Colors ─────────────────────────────────────────────────────
-const CONFETTI_COLORS = [
-  '#2D7A4F', '#2D7A4F', '#2D7A4F',
-  '#4A9D6E',
-  '#C8A23D', '#C8A23D',
-  '#A67B4B', '#A67B4B',
-  '#8B5E3C',
-  '#D4A854',
-  '#5B8C6A',
+// 🎨 Palette 1: BrewTrack (current — coffee/green theme)
+const COLORS_BREWTRACK = [
+  '#2D7A4F', '#2D7A4F', '#2D7A4F',  // brew green (dominant, 3x weight)
+  '#4A9D6E', '#4A9D6E',              // sage green (2x)
+  '#C8A23D', '#C8A23D',              // warm gold (2x)
+  '#A67B4B', '#A67B4B',              // latte brown (2x)
+  '#8B5E3C',                          // espresso
+  '#D4A854',                          // cream gold
+  '#5B8C6A',                          // sage green
+  '#4285F4',                          // blue accent
+  '#7B61FF',                          // purple accent
+  '#EA4335',                          // red accent
 ];
 
+// 🎨 Palette 2: AntiGravity Official (blue/purple dominant)
+const COLORS_ANTIGRAVITY = [
+  '#4285F4', '#4285F4', '#4285F4', '#4285F4',  // Google Blue (dominant, 4x)
+  '#5E97F5', '#5E97F5',                         // Light Blue (2x)
+  '#7B61FF', '#7B61FF', '#7B61FF',              // Purple (3x)
+  '#A78BFA',                                     // Lavender
+  '#EA4335', '#EA4335',                          // Red (2x)
+  '#FF6D93',                                     // Pink
+  '#FBBC04', '#FBBC04',                          // Yellow (2x)
+  '#F9AB00',                                     // Amber
+  '#34A853',                                     // Green
+  '#FF8A50',                                     // Orange
+];
+
+// 🎨 Palette 3: Dark Elegant (for dark backgrounds)
+const COLORS_DARK_ELEGANT = [
+  '#60A5FA', '#60A5FA', '#60A5FA',  // Sky blue (dominant, 3x)
+  '#A78BFA', '#A78BFA',              // Violet (2x)
+  '#F472B6', '#F472B6',              // Pink (2x)
+  '#34D399',                          // Emerald
+  '#FBBF24',                          // Amber
+  '#FB923C',                          // Orange
+  '#E879F9',                          // Fuchsia
+  '#818CF8',                          // Indigo
+];
+
+// ━━━ PALETTE AUTO-SWITCHES WITH DARK MODE ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Light mode → COLORS_BREWTRACK | Dark mode → COLORS_ANTIGRAVITY
+// (Controlled by ThemeContext — no manual switching needed)
+
 // ═══════════════════════════════════════════════════════════════════════
-
-function createGridParticles(width, height) {
+function createParticles(w, h, colors) {
   const particles = [];
-  const cols = Math.ceil(width / GRID_SPACING) + 2;
-  const rows = Math.ceil(height / GRID_SPACING) + 2;
-  const offsetX = (width - (cols - 1) * GRID_SPACING) / 2;
-  const offsetY = (height - (rows - 1) * GRID_SPACING) / 2;
+  const cols = Math.ceil(w / GRID_SPACING) + 2;
+  const rows = Math.ceil(h / GRID_SPACING) + 2;
+  const ox = (w - (cols - 1) * GRID_SPACING) / 2;
+  const oy = (h - (rows - 1) * GRID_SPACING) / 2;
 
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const homeX = offsetX + col * GRID_SPACING;
-      const homeY = offsetY + row * GRID_SPACING;
-      const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
-      const angle = Math.random() * Math.PI * 2;
-      const len = DASH_LENGTH_MIN + Math.random() * (DASH_LENGTH_MAX - DASH_LENGTH_MIN);
-
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const hx = ox + c * GRID_SPACING;
+      const hy = oy + r * GRID_SPACING;
       particles.push({
-        homeX, homeY,
-        x: homeX, y: homeY,
-        vx: 0, vy: 0,
-        color, angle, len,
-        // 每个粒子有独立的旋转方向 (+1 或 -1)
-        orbitDir: Math.random() > 0.5 ? 1 : -1,
+        homeX: hx,
+        homeY: hy,
+        x: hx,
+        y: hy,
+        vx: 0,
+        vy: 0,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        angle: Math.random() * Math.PI * 2,
       });
     }
   }
   return particles;
 }
 
+// ═══════════════════════════════════════════════════════════════════════
 export default function ParticleCanvas() {
   const canvasRef = useRef(null);
   const particlesRef = useRef([]);
-  const mouseRef = useRef({ x: -9999, y: -9999, lastMoveTime: 0 });
-  const animFrameRef = useRef(null);
+  const mouseRef = useRef({ x: -9999, y: -9999 });
+  const animRef = useRef(null);
+  const { isDark } = useTheme();
 
-  const initParticles = useCallback((width, height) => {
-    particlesRef.current = createGridParticles(width, height);
-  }, []);
+  const activeColors = isDark ? COLORS_ANTIGRAVITY : COLORS_BREWTRACK;
+
+  const init = useCallback((w, h) => {
+    particlesRef.current = createParticles(w, h, activeColors);
+  }, [activeColors]);
+
+  // Re-color particles on theme change without resetting positions
+  useEffect(() => {
+    const particles = particlesRef.current;
+    for (let i = 0; i < particles.length; i++) {
+      particles[i].color = activeColors[Math.floor(Math.random() * activeColors.length)];
+    }
+  }, [activeColors]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    let W = window.innerWidth, H = window.innerHeight;
 
     const resize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-      initParticles(width, height);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W;
+      canvas.height = H;
+      init(W, H);
     };
-
     resize();
 
-    const handleMouseMove = (e) => {
+    const onMM = (e) => {
       mouseRef.current.x = e.clientX;
       mouseRef.current.y = e.clientY;
-      mouseRef.current.lastMoveTime = performance.now();
     };
-    const handleMouseLeave = () => {
+    const onML = () => {
       mouseRef.current.x = -9999;
       mouseRef.current.y = -9999;
     };
-    const handleTouchMove = (e) => {
-      if (e.touches.length > 0) {
+    const onTM = (e) => {
+      if (e.touches.length) {
         mouseRef.current.x = e.touches[0].clientX;
         mouseRef.current.y = e.touches[0].clientY;
-        mouseRef.current.lastMoveTime = performance.now();
       }
     };
-    const handleTouchEnd = () => {
+    const onTE = () => {
       mouseRef.current.x = -9999;
       mouseRef.current.y = -9999;
     };
 
     window.addEventListener('resize', resize);
-    window.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
-    window.addEventListener('touchend', handleTouchEnd);
+    window.addEventListener('mousemove', onMM);
+    document.addEventListener('mouseleave', onML);
+    window.addEventListener('touchmove', onTM, { passive: true });
+    window.addEventListener('touchend', onTE);
 
-    // ── 动画主循环 ───────────────────────────────────────────────
+    // ── Animation ────────────────────────────────────────────────────
     const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-      const mouse = mouseRef.current;
+      ctx.clearRect(0, 0, W, H);
+
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
+      const onScreen = mx > -999;
       const particles = particlesRef.current;
-      const mouseRadiusSq = MOUSE_RADIUS * MOUSE_RADIUS;
-      const orbitRadiusSq = IDLE_ORBIT_RADIUS * IDLE_ORBIT_RADIUS;
-      const now = performance.now();
-      const isIdle = (now - mouse.lastMoveTime) > IDLE_THRESHOLD_MS;
-      const mouseOnScreen = mouse.x > -999 && mouse.y > -999;
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
-        const distSq = dx * dx + dy * dy;
+        // ── Repulsion from mouse (always active when on screen) ──────
+        if (onScreen) {
+          const dx = p.x - mx;
+          const dy = p.y - my;
+          const distSq = dx * dx + dy * dy;
+          const dist = Math.sqrt(distSq) || 1;
 
-        // ── 1) 排斥力 (鼠标移动时) ────────────────────────────
-        if (distSq < mouseRadiusSq && distSq > 0) {
-          const dist = Math.sqrt(distSq);
-          const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS;
-          const nx = dx / dist;
-          const ny = dy / dist;
-          p.vx += nx * force * REPEL_STRENGTH * 2;
-          p.vy += ny * force * REPEL_STRENGTH * 2;
+          if (dist < REPEL_RADIUS) {
+            // Stronger force near cursor, fading with distance
+            const t = 1 - dist / REPEL_RADIUS;                // 1 at center, 0 at edge
+            const force = REPEL_STRENGTH * Math.pow(t, REPEL_FALLOFF);
+            p.vx += (dx / dist) * force;
+            p.vy += (dy / dist) * force;
+          }
         }
 
-        // ── 2) 轨道旋转力 (鼠标静止时) ────────────────────────
-        // 当鼠标不动时，附近的粒子施加切线力产生持续旋转
-        if (isIdle && mouseOnScreen && distSq < orbitRadiusSq && distSq > 0) {
-          const dist = Math.sqrt(distSq);
-          const nx = dx / dist;
-          const ny = dy / dist;
-          // 切线方向 = 法线旋转90°
-          const tx = -ny * p.orbitDir;
-          const ty = nx * p.orbitDir;
-          // 非线性衰减：中间距离的粒子旋转最快 (bell-curve)
-          const normalizedDist = dist / IDLE_ORBIT_RADIUS;
-          const bellCurve = Math.exp(-8 * (normalizedDist - 0.4) * (normalizedDist - 0.4));
-          p.vx += tx * IDLE_ORBIT_SPEED * bellCurve * 6;
-          p.vy += ty * IDLE_ORBIT_SPEED * bellCurve * 6;
-        }
+        // ── Spring back to grid home position ────────────────────────
+        p.vx += (p.homeX - p.x) * SPRING;
+        p.vy += (p.homeY - p.y) * SPRING;
 
-        // ── 3) 弹簧回弹 ──────────────────────────────────────
-        const springDx = p.homeX - p.x;
-        const springDy = p.homeY - p.y;
-        p.vx += springDx * SPRING_STIFFNESS;
-        p.vy += springDy * SPRING_STIFFNESS;
+        // ── Damping ──────────────────────────────────────────────────
+        p.vx *= DAMPING;
+        p.vy *= DAMPING;
 
-        // 阻尼
-        p.vx *= SPRING_DAMPING;
-        p.vy *= SPRING_DAMPING;
-
-        // 更新位置
+        // ── Integrate ────────────────────────────────────────────────
         p.x += p.vx;
         p.y += p.vy;
 
-        // ── 绘制 ─────────────────────────────────────────────
-        const halfLen = p.len / 2;
-        const cosA = Math.cos(p.angle);
-        const sinA = Math.sin(p.angle);
+        // ── Rotate dash based on displacement from home ──────────────
+        const dispX = p.x - p.homeX;
+        const dispY = p.y - p.homeY;
+        const dispLen = Math.sqrt(dispX * dispX + dispY * dispY);
+        if (dispLen > 1) {
+          // Dash aligns with direction of displacement
+          const targetAngle = Math.atan2(dispY, dispX);
+          let diff = targetAngle - p.angle;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          p.angle += diff * 0.12;
+        }
+
+        // ── Draw confetti dash ───────────────────────────────────────
+        const halfL = DASH_LEN / 2;
+        const cos = Math.cos(p.angle);
+        const sin = Math.sin(p.angle);
 
         ctx.beginPath();
-        ctx.moveTo(p.x - cosA * halfLen, p.y - sinA * halfLen);
-        ctx.lineTo(p.x + cosA * halfLen, p.y + sinA * halfLen);
+        ctx.moveTo(p.x - cos * halfL, p.y - sin * halfL);
+        ctx.lineTo(p.x + cos * halfL, p.y + sin * halfL);
         ctx.strokeStyle = p.color;
-        ctx.globalAlpha = PARTICLE_OPACITY;
         ctx.lineWidth = DASH_WIDTH;
         ctx.lineCap = 'round';
+        ctx.globalAlpha = BASE_ALPHA;
         ctx.stroke();
       }
 
       ctx.globalAlpha = 1;
-      animFrameRef.current = requestAnimationFrame(animate);
+      animRef.current = requestAnimationFrame(animate);
     };
 
-    animFrameRef.current = requestAnimationFrame(animate);
+    animRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (animRef.current) cancelAnimationFrame(animRef.current);
       window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('mousemove', onMM);
+      document.removeEventListener('mouseleave', onML);
+      window.removeEventListener('touchmove', onTM);
+      window.removeEventListener('touchend', onTE);
     };
-  }, [initParticles]);
+  }, [init]);
 
   return (
     <canvas
@@ -218,8 +299,7 @@ export default function ParticleCanvas() {
       id="particle-canvas"
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
+        top: 0, left: 0,
         width: '100vw',
         height: '100vh',
         zIndex: 0,

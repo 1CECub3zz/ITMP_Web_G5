@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
           setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email || '',
-            // 💥 防御性修复：先判断是否有 email，没有则默认使用 'Brewer'
+            // 💥 Defensive fix: check for email first, default to 'Brewer' if none
             full_name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Brewer'),
           });
           setAuthError(null);
@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
       } catch (error) {
         console.error("Auth context processing error:", error);
       } finally {
-        // 💥 无论发生什么，强制关闭转圈加载动画！
+        // 💥 Force close the loading spinner no matter what happens!
         setAuthChecked(true);
         setIsLoadingAuth(false);
       }

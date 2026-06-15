@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, PackageCheck, AlertTriangle, X, Check, Package } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
+import WheelPicker from '@/components/ui/WheelPicker';
 import { useToast } from '@/components/ui/use-toast';
 import { useI18n } from '@/lib/I18nContext';
 import { BREW_TYPES } from '@/lib/brewMeta';
@@ -106,11 +107,11 @@ function LotModal({ onClose, onSave, t }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>{t('inventory.initialWeight')} *</label>
-              <input type="number" className={inputCls} placeholder="5000" value={form.initialWeightGrams} onChange={e => set('initialWeightGrams', e.target.value)} />
+              <WheelPicker className="mt-2" height={100} min={50} max={10000} step={50} unit="g" value={Number(form.initialWeightGrams) || 5000} onChange={val => set('initialWeightGrams', val)} />
             </div>
             <div>
               <label className={labelCls}>{t('inventory.lowStockThreshold')}</label>
-              <input type="number" className={inputCls} placeholder="200" value={form.lowStockThresholdGrams} onChange={e => set('lowStockThresholdGrams', e.target.value)} />
+              <WheelPicker className="mt-2" height={100} min={10} max={2000} step={10} unit="g" value={Number(form.lowStockThresholdGrams) || 200} onChange={val => set('lowStockThresholdGrams', val)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">

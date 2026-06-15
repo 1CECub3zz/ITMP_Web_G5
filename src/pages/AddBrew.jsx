@@ -9,6 +9,7 @@ import {
 import Navbar from '@/components/layout/Navbar';
 import StarRating from '@/components/ui/StarRating';
 import RippleButton from '@/components/ui/RippleButton';
+import WheelPicker from '@/components/ui/WheelPicker';
 import { useToast } from '@/components/ui/use-toast';
 import { BREW_METHODS, BREW_TYPES } from '@/lib/brewMeta';
 import { useI18n } from '@/lib/I18nContext';
@@ -317,12 +318,13 @@ export default function AddBrew() {
 
       <div>
         <label className={LABEL}>🧂 {t('addBrew.actualWeight')}</label>
-        <input
-          type="number"
-          className={BIG_INPUT}
-          placeholder={selectedProfile?.targetDoseGrams ? `${t('addBrew.profileTarget').replace('{value}', selectedProfile.targetDoseGrams + 'g')}` : '0'}
-          value={form.actualWeightGrams}
-          onChange={e => updateForm('actualWeightGrams', e.target.value)}
+        <WheelPicker
+          min={0}
+          max={200}
+          step={0.5}
+          unit="g"
+          value={Number(form.actualWeightGrams) || 0}
+          onChange={val => updateForm('actualWeightGrams', val)}
         />
         {selectedProfile?.targetDoseGrams && form.actualWeightGrams &&
           Number(form.actualWeightGrams) !== selectedProfile.targetDoseGrams && (
@@ -337,11 +339,11 @@ export default function AddBrew() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className={LABEL}>{t('addBrew.portions')}</label>
-          <input type="number" min="1" className={BIG_INPUT} value={form.pax} onChange={e => updateForm('pax', Number(e.target.value))} />
+          <WheelPicker min={1} max={20} step={1} unit="pax" value={form.pax || 1} onChange={val => updateForm('pax', val)} />
         </div>
         <div>
           <label className={LABEL}>{t('addBrew.waterVolume')}</label>
-          <input type="number" step="0.01" className={BIG_INPUT} placeholder="0.30" value={form.waterVolumeLiters} onChange={e => updateForm('waterVolumeLiters', e.target.value)} />
+          <WheelPicker min={0.05} max={2.00} step={0.05} unit="L" value={Number(form.waterVolumeLiters) || 0.3} onChange={val => updateForm('waterVolumeLiters', val)} />
         </div>
       </div>
 
@@ -358,14 +360,13 @@ export default function AddBrew() {
     <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
       <div>
         <label className={LABEL}><Thermometer size={12} className="inline mr-1" />{t('addBrew.waterTemp')}</label>
-        <input
-          type="number"
-          className={BIG_INPUT}
-          placeholder={selectedProfile?.targetWaterTempC
-            ? t('addBrew.profileTarget').replace('{value}', selectedProfile.targetWaterTempC + '°C')
-            : '93'}
-          value={form.waterTemp}
-          onChange={e => updateForm('waterTemp', e.target.value)}
+        <WheelPicker
+          min={50}
+          max={100}
+          step={1}
+          unit="°C"
+          value={Number(form.waterTemp) || 93}
+          onChange={val => updateForm('waterTemp', val)}
         />
         {selectedProfile?.targetWaterTempC && (
           <p className="text-xs text-muted-foreground mt-1">
@@ -431,13 +432,13 @@ export default function AddBrew() {
 
       <div>
         <label className={LABEL}><FlaskConical size={12} className="inline mr-1" />{t('addBrew.tdsLabel')}</label>
-        <input
-          type="number"
-          step="0.01"
-          className={BIG_INPUT}
-          placeholder="1.35"
-          value={form.tds}
-          onChange={e => updateForm('tds', e.target.value)}
+        <WheelPicker
+          min={0.50}
+          max={3.00}
+          step={0.05}
+          unit="%"
+          value={Number(form.tds) || 1.35}
+          onChange={val => updateForm('tds', val)}
         />
         <p className="text-xs text-muted-foreground mt-1.5">{t('addBrew.tdsHint')}</p>
         {selectedProfile?.targetTdsMin && selectedProfile?.targetTdsMax && (
@@ -456,12 +457,13 @@ export default function AddBrew() {
 
       <div>
         <label className={LABEL}><Droplets size={12} className="inline mr-1" />{t('addBrew.yieldLabel')}</label>
-        <input
-          type="number"
-          className={BIG_INPUT}
-          placeholder="280"
-          value={form.yieldVolumeMl}
-          onChange={e => updateForm('yieldVolumeMl', e.target.value)}
+        <WheelPicker
+          min={10}
+          max={2000}
+          step={10}
+          unit="ml"
+          value={Number(form.yieldVolumeMl) || 280}
+          onChange={val => updateForm('yieldVolumeMl', val)}
         />
         {form.waterVolumeLiters && form.yieldVolumeMl && (
           <p className="text-xs text-muted-foreground mt-1.5">

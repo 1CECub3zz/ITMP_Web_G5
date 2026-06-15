@@ -6,6 +6,7 @@ import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { Coffee } from 'lucide-react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { ThemeProvider } from '@/lib/ThemeContext';
 import ParticleCanvas from '@/components/ParticleCanvas';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -29,7 +30,7 @@ const AuthenticatedApp = () => {
 
     if (isLoadingPublicSettings || isLoadingAuth) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-brew-cream">
+            <div className="fixed inset-0 flex items-center justify-center bg-background">
                 <div className="text-center text-brew-green">
                     <Coffee size={48} className="mx-auto mb-4 opacity-50" />
                     <div className="w-8 h-8 border-4 border-brew-green/30 border-t-brew-green rounded-full animate-spin mx-auto"></div>
@@ -69,15 +70,17 @@ function App() {
     return (
         <GoogleReCaptchaProvider reCaptchaKey="6Le9sBctAAAAAGRilAg6Hd_5WdaA90BGAEmpE0QD">
             <AuthProvider>
-                <QueryClientProvider client={queryClientInstance}>
-                    <Router>
-                        <ParticleCanvas />
-                        <div className="content-layer min-h-screen">
-                            <AuthenticatedApp />
-                        </div>
-                    </Router>
-                    <Toaster />
-                </QueryClientProvider>
+                <ThemeProvider>
+                    <QueryClientProvider client={queryClientInstance}>
+                        <Router>
+                            <ParticleCanvas />
+                            <div className="content-layer min-h-screen">
+                                <AuthenticatedApp />
+                            </div>
+                        </Router>
+                        <Toaster />
+                    </QueryClientProvider>
+                </ThemeProvider>
             </AuthProvider>
         </GoogleReCaptchaProvider>
     );

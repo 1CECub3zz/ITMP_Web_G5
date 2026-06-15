@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Pencil, X, Thermometer, Clock, Droplets, FlaskConical, Target, Check } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
+import WheelPicker from '@/components/ui/WheelPicker';
 import { useToast } from '@/components/ui/use-toast';
 import { useI18n } from '@/lib/I18nContext';
 import { BREW_TYPES, BREW_METHODS } from '@/lib/brewMeta';
@@ -118,11 +119,11 @@ function ProfileModal({ profile, onClose, onSave, t }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>{t('profiles.targetDose')}</label>
-              <input type="number" className={inputCls} placeholder="20" value={form.targetDoseGrams} onChange={e => set('targetDoseGrams', e.target.value)} />
+              <WheelPicker className="mt-2" height={100} min={10} max={100} step={0.5} unit="g" value={Number(form.targetDoseGrams) || 20} onChange={val => set('targetDoseGrams', val)} />
             </div>
             <div>
               <label className={labelCls}>{t('profiles.targetTemp')}</label>
-              <input type="number" className={inputCls} placeholder="93" value={form.targetWaterTempC} onChange={e => set('targetWaterTempC', e.target.value)} />
+              <WheelPicker className="mt-2" height={100} min={60} max={100} step={1} unit="°C" value={Number(form.targetWaterTempC) || 93} onChange={val => set('targetWaterTempC', val)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -132,17 +133,17 @@ function ProfileModal({ profile, onClose, onSave, t }) {
             </div>
             <div>
               <label className={labelCls}>{t('profiles.targetYield')}</label>
-              <input type="number" className={inputCls} placeholder="300" value={form.targetYieldMl} onChange={e => set('targetYieldMl', e.target.value)} />
+              <WheelPicker className="mt-2" height={100} min={10} max={1000} step={10} unit="ml" value={Number(form.targetYieldMl) || 300} onChange={val => set('targetYieldMl', val)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>{t('profiles.tdsMin')}</label>
-              <input type="number" step="0.1" className={inputCls} placeholder="1.2" value={form.targetTdsMin} onChange={e => set('targetTdsMin', e.target.value)} />
+              <WheelPicker className="mt-2" height={100} min={0.5} max={3.0} step={0.1} unit="%" value={Number(form.targetTdsMin) || 1.2} onChange={val => set('targetTdsMin', val)} />
             </div>
             <div>
               <label className={labelCls}>{t('profiles.tdsMax')}</label>
-              <input type="number" step="0.1" className={inputCls} placeholder="1.5" value={form.targetTdsMax} onChange={e => set('targetTdsMax', e.target.value)} />
+              <WheelPicker className="mt-2" height={100} min={0.5} max={3.0} step={0.1} unit="%" value={Number(form.targetTdsMax) || 1.5} onChange={val => set('targetTdsMax', val)} />
             </div>
           </div>
           <div>

@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, User, Coffee, Trophy, Package, BookOpen, LayoutDashboard, PlusCircle, ClipboardList, Users } from 'lucide-react';
+import { Menu, X, LogOut, User, Coffee, Trophy, Package, BookOpen, LayoutDashboard, PlusCircle, ClipboardList, Users, Sun, Moon } from 'lucide-react';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { useI18n } from '@/lib/I18nContext';
 import { useAuth } from '@/lib/AuthContext';
+import { useTheme } from '@/lib/ThemeContext';
 import { logoutUser } from '@/api/db-services';
 
 export default function Navbar() {
@@ -12,11 +13,12 @@ export default function Navbar() {
   const location = useLocation();
   const { user } = useAuth();
   const { t } = useI18n();
+  const { isDark, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
 
-  // 点击外部关闭用户下拉菜单
+  // Close user dropdown on click outside
   useEffect(() => {
     if (!profileOpen) return;
     const handleClickOutside = (e) => {
@@ -64,7 +66,7 @@ export default function Navbar() {
                 <Link
                     key={link.path}
                     to={link.path}
-                    className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    className={`relative px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
                         isActive(link.path) ? 'text-brew-green font-semibold' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                 >
@@ -83,8 +85,15 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
             <LanguageSwitcher compact />
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200 hover:scale-105"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
           </div>
           <div className="relative" ref={profileRef}>
             <button
@@ -131,7 +140,16 @@ export default function Navbar() {
                   className="md:hidden overflow-hidden border-t border-border bg-card"
               >
                 <div className="px-4 py-3 flex flex-col gap-1">
-                  <LanguageSwitcher compact className="mb-2" />
+                  <div className="flex items-center gap-2 mb-2">
+                    <LanguageSwitcher compact />
+                    <button
+                      onClick={toggleTheme}
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
+                      aria-label="Toggle theme"
+                    >
+                      {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                    </button>
+                  </div>
                   {navLinks.map((link) => (
                       <Link
                           key={link.path}

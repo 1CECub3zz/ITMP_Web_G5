@@ -6,7 +6,7 @@ import RippleButton from '@/components/ui/RippleButton';
 import { useI18n } from '@/lib/I18nContext';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
-// 💥 关键点：这里必须有 export default
+// 💥 Critical: export default is required here
 export default function Register() {
   const navigate = useNavigate();
   const { t } = useI18n();

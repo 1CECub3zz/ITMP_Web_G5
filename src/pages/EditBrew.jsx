@@ -4,12 +4,13 @@ import { motion } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import RippleButton from '@/components/ui/RippleButton';
 import StarRating from '@/components/ui/StarRating';
+import WheelPicker from '@/components/ui/WheelPicker';
 import { Upload, CheckCircle } from 'lucide-react';
 import { BREW_METHODS, BREW_TYPES } from '@/lib/brewMeta';
 import { useI18n } from '@/lib/I18nContext';
 import { useToast } from '@/components/ui/use-toast';
 
-// 💥 引入真实 API
+// 💥 Import real API
 import { getBrewById, updateBrewLog, uploadBrewImage } from '@/api/db-services';
 
 export default function EditBrew() {
@@ -25,7 +26,7 @@ export default function EditBrew() {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
-    // 💥 获取云端真实数据，并使用 BFF 模式反向映射到表单
+    // 💥 Fetch real cloud data and reverse map to form using BFF pattern
     getBrewById(id).then((b) => {
       if (b) {
         setForm({
@@ -67,7 +68,7 @@ export default function EditBrew() {
 
   const handleSave = async () => {
     setSaving(true);
-    // 💥 映射回 Firebase 结构
+    // 💥 Map back to Firebase structure
     const updatePayload = {
       "basics.beanName": form.name,
       "basics.roaster": form.type,
@@ -122,7 +123,7 @@ export default function EditBrew() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-1.5">Dose (grams)</label>
-                  <input type="number" value={form.ingredients} onChange={(e) => set('ingredients', e.target.value)} className="w-full border border-input bg-background rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brew-green" />
+                  <WheelPicker height={100} min={1} max={100} step={0.5} unit="g" value={Number(form.ingredients) || 20} onChange={val => set('ingredients', val)} />
                 </div>
               </div>
               <div>
