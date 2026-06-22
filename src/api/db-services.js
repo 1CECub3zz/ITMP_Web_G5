@@ -291,7 +291,10 @@ export async function getInventoryLots() {
                 currentStockGrams: (data.initialWeightGrams || 0) - (data.totalDeductedGrams || 0),
             };
         });
-    } catch (error) { return []; }
+    } catch (error) {
+        console.error("❌ getInventoryLots failed:", error.message, "\n💡 If the error mentions an index, click the link in the browser console to create it in Firebase.");
+        return [];
+    }
 }
 
 export async function updateInventoryLot(lotId, updateData) {
